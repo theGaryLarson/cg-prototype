@@ -99,4 +99,4 @@ Follow these steps to set up and start the project:
 
 ## License
 
-(Patience, please. More details are on the way...)
+This project is licensed under the terms of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
