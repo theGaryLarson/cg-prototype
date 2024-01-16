@@ -1,7 +1,7 @@
 /* Core */
 import { NextResponse } from 'next/server';
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request, _res: Response) {
   const body = await req.json();
   const { amount = 1 } = body;
 
