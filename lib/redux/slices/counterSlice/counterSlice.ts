@@ -1,16 +1,16 @@
 /* Core */
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 /* Instruments */
-import { incrementAsync } from "./thunks";
+import { incrementAsync } from './thunks';
 
 const initialState: CounterSliceState = {
   value: 0,
-  status: "idle",
+  status: 'idle',
 };
 
 export const counterSlice = createSlice({
-  name: "counter",
+  name: 'counter',
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
@@ -34,10 +34,10 @@ export const counterSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(incrementAsync.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
       })
       .addCase(incrementAsync.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = 'idle';
         state.value += action.payload;
       });
   },
@@ -46,5 +46,5 @@ export const counterSlice = createSlice({
 /* Types */
 export interface CounterSliceState {
   value: number;
-  status: "idle" | "loading" | "failed";
+  status: 'idle' | 'loading' | 'failed';
 }

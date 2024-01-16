@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 /* Core */
-import { useState } from "react";
+import { useState } from 'react';
 
 /* Instruments */
 import {
@@ -11,8 +11,8 @@ import {
   selectCount,
   incrementAsync,
   incrementIfOddAsync,
-} from "@/lib/redux";
-import styles from "./counter.module.css";
+} from '@/lib/redux';
+import styles from './counter.module.css';
 
 export const Counter = () => {
   const dispatch = useDispatch();
@@ -43,25 +43,27 @@ export const Counter = () => {
           className={styles.textbox}
           aria-label="Set increment amount"
           value={incrementAmount}
-          onChange={(e) => setIncrementAmount(Number(e.target.value ?? 0))}
+          onChange={(e) => {
+            setIncrementAmount(Number(e.target.value ?? 0));
+          }}
         />
         <button
           className={styles.button}
-          onClick={() =>
-            dispatch(counterSlice.actions.incrementByAmount(incrementAmount))
-          }
+          onClick={() => dispatch(counterSlice.actions.incrementByAmount(incrementAmount))}
         >
           Add Amount
         </button>
         <button
           className={styles.asyncButton}
-          onClick={() => dispatch(incrementAsync(incrementAmount))}
+          onClick={async () => await dispatch(incrementAsync(incrementAmount))}
         >
           Add Async
         </button>
         <button
           className={styles.button}
-          onClick={() => dispatch(incrementIfOddAsync(incrementAmount))}
+          onClick={() => {
+            dispatch(incrementIfOddAsync(incrementAmount));
+          }}
         >
           Add If Odd
         </button>

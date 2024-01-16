@@ -48,27 +48,27 @@ Follow these steps to set up and start the project:
 1. **Clone the Repository**: Start by cloning the repository to your local machine. You can do this by running the
    following command in your terminal:
 
-    ```bash
-    git clone https://github.com/theGaryLarson/cg-prototype
-    ```
+   ```bash
+   git clone https://github.com/theGaryLarson/cg-prototype
+   ```
 
 2. **Navigate into the cloned directory**: Once you have cloned the repository, navigate into the directory:
 
-    ```bash
-    cd cg-prototype
-    ```
+   ```bash
+   cd cg-prototype
+   ```
 
 3. **Install the dependencies**: Install the necessary packages for the project by running:
 
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 4. **Start the Development Server**: You can start the development server by running:
 
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
    This starts the development server on `localhost:3000` (or a different port if specified). Navigate
    to `http://localhost:3000` (or whichever port you specified) in your browser to see your application running.
@@ -76,26 +76,23 @@ Follow these steps to set up and start the project:
 5. **Build the Application**: If you want to create an optimized version of the app for deployment, you can create a
    production build by running:
 
-    ```bash
-    npm run build
-    ```
+   ```bash
+   npm run build
+   ```
 
 6. **Start the Production Server**: After creating a build, you can start the production server by running:
 
-    ```bash
-    npm run start
-    ```
+   ```bash
+   npm run start
+   ```
+
    If you want to run the production server on a specific port, you can use `npm run start -- -p YourPortNumber`. </br>
 
 7. **Running Tests**: If your application has an associated Jest test suite, you can run the tests by executing:
 
-    ```bash
-    npm test
-    ```
-
-## Contributing
-
-(Application is open! More details are on the way...)
+   ```bash
+   npm test
+   ```
 
 ## License
 
