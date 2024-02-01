@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model EdInstitution {
+  edInstitutionId  String              @id @unique(map: "edu_institution_id_UNIQUE") @map("edu_institution_id") @db.Char(36)
+  name             String?             @db.VarChar(255)
+  address          String              @db.VarChar(255)
+  contactEmail     String              @map("contact_email") @db.VarChar(255)
+  edUrl            String              @map("edu_url") @db.VarChar(255)
+  learners         Learner[]
+  trainingProvider trainingProvider[]
+
+  @@map("edu_institution")
+}
+
+model Employer {
+  employerId          String       @map("employer_id")@id @unique(map: "employer_id_UNIQUE") @db.Char(36)
+  user_id              String       @db.Char(36)
+  title                String       @db.VarChar(255)
+  home_office_location String?      @db.VarChar(255)
+  employer_url         String?      @db.VarChar(255)
+  logo_url             String?      @db.VarChar(255)
+  user                 User         @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_employer_user1")
+  job_listing          JobListing[]
+
+  @@index([user_id], map: "fk_employer_user1_idx")
+  @@map("employer")
+}
+
+model JobListing {
+  job_listing_id                 String                    @id @unique(map: "job_listing_id_UNIQUE") @db.Char(36)
+  employer_id                    String                    @db.Char(36)
+  position_loc                   JobListingPositionLoc
+  salary_range                   String                    @db.VarChar(45)
+  region                         String                    @db.VarChar(45)
+  employer                       Employer                  @relation(fields: [employer_id], references: [employerId], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_listing_employer1")
+  job_listing_has_skill_category JobListingSkillCategory[]
+
+  @@index([employer_id], map: "fk_job_listing_employer1_idx")
+  @@map("job_listing")
+}
+
+model JobListingSkillCategory {
+  job_listing_has_skill_category_id String         @id @unique(map: "job_listing_has_skill_category_id_UNIQUE") @db.Char(36)
+  job_listing_id                    String         @db.Char(36)
+  skill_category_id                 String         @db.Char(36)
+  job_listing                       JobListing     @relation(fields: [job_listing_id], references: [job_listing_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_listing_has_skill_category_job_listing1")
+  skill_category                    skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_listing_has_skill_category_skill_category1")
+
+  @@index([job_listing_id], map: "fk_job_listing_has_skill_category_job_listing1_idx")
+  @@index([skill_category_id], map: "fk_job_listing_has_skill_category_skill_category1_idx")
+  @@map("job_listing_has_skill_category")
+}
+
+model Learner {
+  learnerId                         String                               @map("learner_id") @id @unique(map: "learner_id_UNIQUE") @db.Char(36)
+  user_id                            String                               @db.Char(36)
+  is_enrolled_college                Int                                  @db.TinyInt
+  edu_institution_id                 String?                              @db.Char(36)
+  degree_type                        String                               @db.VarChar(45)
+  intern_hours_required              Int                                  @db.TinyInt
+  major                              String?                              @db.VarChar(45)
+  minor                              String?                              @db.VarChar(45)
+  edu_institution                    EdInstitution?                       @relation(fields: [edu_institution_id], references: [edInstitutionId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_edu_institution1")
+  user                               User                                 @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_user1")
+  learner_private_data               learner_private_data[]
+  learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
+  learner_skill_gap_data             learner_skill_gap_data[]
+
+  @@index([edu_institution_id], map: "fk_learner_edu_institution1_idx")
+  @@index([user_id], map: "fk_learner_user1_idx")
+  @@map("learner")
+}
+
+model learner_private_data {
+  learner_private_data_id String  @id @unique(map: "learner_private_data_id_UNIQUE") @db.Char(36)
+  learner_id              String  @db.Char(36)
+  ssn                     String? @db.VarChar(255)
+  learner                 Learner @relation(fields: [learner_id], references: [learnerId], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_learner_private_data_user1")
+
+  @@index([learner_id], map: "fk_user_learner_private_data_user1")
+}
+
+model LearnerProjBasedTechAssessment {
+  learner_proj_based_tech_assessment_id String                     @id @unique(map: "learner_proj_based_tech_assessment_id_UNIQUE") @db.Char(36)
+  learner_id                            String                     @db.Char(36)
+  proj_based_tech_assessment_id         String                     @db.Char(36)
+  attempt_date                          DateTime                   @db.Date
+  has_passed                            Int                        @db.TinyInt
+  proj_based_tech_assessment            proj_based_tech_assessment @relation(fields: [proj_based_tech_assessment_id], references: [proj_based_tech_assessment_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_has_proj_based_tech_assessment_proj_based_tech_asse1")
+  learner                               Learner                    @relation(fields: [learner_id], references: [learnerId], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_has_proj_based_tech_assessment_user1")
+
+  @@index([proj_based_tech_assessment_id], map: "fk_user_has_proj_based_tech_assessment_proj_based_tech_as_idx")
+  @@index([learner_id], map: "fk_user_has_proj_based_tech_assessment_user1_idx")
+
+  @@map("learner_proj_based_tech_assessment")
+}
+
+model learner_skill_gap_data {
+  learner_skill_gap_data_id String         @id @unique(map: "learner_skill_gap_data_id_UNIQUE") @db.Char(36)
+  learner_id                String         @db.Char(36)
+  skill_category_id         String         @db.Char(36)
+  learner                   Learner        @relation(fields: [learner_id], references: [learnerId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_skill_gap_data_learner1")
+  skill_category            skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_skill_gap_data_skill_category1")
+
+  @@index([learner_id], map: "fk_learner_skill_gap_data_learner1")
+  @@index([skill_category_id], map: "fk_learner_skill_gap_data_skill_category1_idx")
+}
+
+model mentor {
+  mentor_id        String             @id @unique(map: "mentor_id_UNIQUE") @db.Char(36)
+  user_id          String             @db.Char(36)
+  user             User               @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_mentor_user1")
+  mentor_has_skill mentor_has_skill[]
+
+  @@index([user_id], map: "fk_mentor_user1_idx")
+}
+
+model mentor_has_skill {
+  mentor_has_skill_id              String         @id @unique(map: "mentor_has_skill_id_UNIQUE") @db.Char(36)
+  skill_category_skill_category_id String         @db.Char(36)
+  mentor_mentor_id                 String         @db.Char(36)
+  mentor                           mentor         @relation(fields: [mentor_mentor_id], references: [mentor_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_mentor1")
+  skill_category                   skill_category @relation(fields: [skill_category_skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_skill_category1")
+
+  @@index([mentor_mentor_id], map: "fk_skill_category_has_mentor_mentor1_idx")
+  @@index([skill_category_skill_category_id], map: "fk_skill_category_has_mentor_skill_category1_idx")
+}
+
+model proj_based_tech_assessment {
+  proj_based_tech_assessment_id      String                               @unique(map: "proj_based_tech_assessment_id_UNIQUE") @db.Char(36)
+  skill_category_id                  String                               @db.Char(36)
+  url                                String                               @db.VarChar(255)
+  learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
+  skill_category                     skill_category                       @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proj_based_tech_assessment_skill_category1")
+
+  @@id([proj_based_tech_assessment_id, skill_category_id])
+  @@index([skill_category_id], map: "fk_proj_based_tech_assessment_skill_category1_idx")
+}
+
+model sa_possible_answer {
+  sa_possible_answer_id String      @id @unique(map: "sa_possible_answer_id_UNIQUE") @db.Char(36)
+  sa_question_id        String      @db.Char(36)
+  answer_text           String?     @db.VarChar(255)
+  sa_question           sa_question @relation(fields: [sa_question_id], references: [sa_question_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sa_possilbe_answer_sa_question1")
+
+  @@index([sa_question_id], map: "fk_sa_possible_answer_sa_question1_idx")
+}
+
+model sa_question {
+  sa_question_id     String                     @id @unique(map: "sa_question_id_UNIQUE") @db.Char(36)
+  self_assessment_id String                     @db.Char(36)
+  sa_question_text   String                     @db.VarChar(255)
+  question_type      SelfAssessmentQuestionType
+  correct_answer_id  String                     @db.Char(36)
+  sa_possible_answer sa_possible_answer[]
+  self_assessment    self_assessment            @relation(fields: [self_assessment_id], references: [self_assessment_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sa_question_self_assessment")
+
+  @@index([self_assessment_id], map: "fk_sa_question_self_assessment1_idx")
+}
+
+model self_assessment {
+  self_assessment_id String         @id @unique(map: "self_assessment_id_UNIQUE") @db.Char(36)
+  skill_category_id  String         @db.Char(36)
+  sa_question        sa_question[]
+  skill_category     skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_self_assessment_skill_category1")
+
+  @@index([skill_category_id], map: "fk_self_assessment_skill_category1")
+}
+
+model skill {
+  skill_id          String         @id @unique(map: "skill_id_UNIQUE") @db.Char(36)
+  skill_category_id String         @db.Char(36)
+  skill_name        String         @db.VarChar(45)
+  skill_description String         @db.VarChar(45)
+  skill_category    skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_skill_category")
+
+  @@index([skill_category_id], map: "fk_skill_skill_category_idx")
+}
+
+model skill_category {
+  skill_category_id          String                       @id @unique(map: "skill_category_id_UNIQUE") @db.Char(36)
+  category_name              String                       @db.VarChar(255)
+  category_description       String                       @db.VarChar(255)
+  jobListingHasSkillCategory JobListingSkillCategory[]
+  learner_skill_gap_data     learner_skill_gap_data[]
+  mentor_has_skill           mentor_has_skill[]
+  proj_based_tech_assessment proj_based_tech_assessment[]
+  self_assessment            self_assessment[]
+  skill                      skill[]
+  training_program           training_program[]
+}
+
+model training_program {
+  training_programs_id String            @id @unique(map: "training_program_id_UNIQUE") @db.Char(36)
+  training_provider_id String            @db.Char(36)
+  skill_category_id    String            @db.Char(36)
+  training_provider    trainingProvider @relation(fields: [training_provider_id], references: [training_provider_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_program_training_provider1")
+  skill_category       skill_category    @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_programs_skill_category1")
+
+  @@index([skill_category_id], map: "fk_training_program_skill_category1_idx")
+  @@index([training_provider_id], map: "fk_training_program_training_provider1_idx")
+}
+
+model trainingProvider {
+  training_provider_id String             @id @unique(map: "training_provider_id_UNIQUE") @db.Char(36)
+  user_id              String             @db.Char(36)
+  edu_institution_id   String             @db.Char(36)
+  training_program     training_program[]
+  edu_institution      EdInstitution      @relation(fields: [edu_institution_id], references: [edInstitutionId], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_provider_edu_institution1")
+  user                 User               @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_provider_user1")
+
+  @@index([edu_institution_id], map: "fk_training_provider_edu_institution1_idx")
+  @@index([user_id], map: "fk_training_provider_user1_idx")
+
+  @@map("training_provider")
+}
+
+model User {
+  userId            String              @id @unique(map: "user_id_UNIQUE") @map("user_id") @db.Char(36)
+  userName          String              @map("user_name") @db.VarChar(255)
+  password          String              @db.VarChar(255)
+  email             String              @db.VarChar(255)
+  employers         Employer[]
+  learners          Learner[]
+  mentors           mentor[]
+  trainingProviders trainingProvider[]
+
+  @@map("user")
+}
+
+enum JobListingPositionLoc {
+  on_site @map("on-site")
+  remote  @map("remote")
+  hybrid  @map("hybrid")
+
+  @@map("job_listing_position_loc")
+}
+
+enum SelfAssessmentQuestionType {
+  interest    @map("interest")
+  competency  @map("competency")
+
+  @@map("sa_question_question_type")
+}
