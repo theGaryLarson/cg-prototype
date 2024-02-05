@@ -19,6 +19,7 @@
     "react-redux": "8.1.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "@types/node": "20.3.1",
