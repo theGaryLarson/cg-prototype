@@ -8,11 +8,11 @@ datasource db {
 }
 
 model EdInstitution {
-  edInstitutionId  String              @id @unique(map: "edu_institution_id_UNIQUE") @map("edu_institution_id") @db.Char(36)
-  name             String?             @db.VarChar(255)
-  address          String              @db.VarChar(255)
-  contactEmail     String              @map("contact_email") @db.VarChar(255)
-  edUrl            String              @map("edu_url") @db.VarChar(255)
+  edInstitutionId  String             @id @unique(map: "edu_institution_id_UNIQUE") @map("edu_institution_id") @db.Char(36)
+  name             String?            @db.VarChar(255)
+  address          String             @db.VarChar(255)
+  contactEmail     String             @map("contact_email") @db.VarChar(255)
+  edUrl            String             @map("edu_url") @db.VarChar(255)
   learners         Learner[]
   trainingProvider trainingProvider[]
 
@@ -20,7 +20,7 @@ model EdInstitution {
 }
 
 model Employer {
-  employerId          String       @map("employer_id")@id @unique(map: "employer_id_UNIQUE") @db.Char(36)
+  employerId           String       @id @unique(map: "employer_id_UNIQUE") @map("employer_id") @db.Char(36)
   user_id              String       @db.Char(36)
   title                String       @db.VarChar(255)
   home_office_location String?      @db.VarChar(255)
@@ -59,16 +59,16 @@ model JobListingSkillCategory {
 }
 
 model Learner {
-  learnerId                         String                               @map("learner_id") @id @unique(map: "learner_id_UNIQUE") @db.Char(36)
-  user_id                            String                               @db.Char(36)
-  is_enrolled_college                Int                                  @db.TinyInt
-  edu_institution_id                 String?                              @db.Char(36)
-  degree_type                        String                               @db.VarChar(45)
-  intern_hours_required              Int                                  @db.TinyInt
-  major                              String?                              @db.VarChar(45)
-  minor                              String?                              @db.VarChar(45)
-  edu_institution                    EdInstitution?                       @relation(fields: [edu_institution_id], references: [edInstitutionId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_edu_institution1")
-  user                               User                                 @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_user1")
+  learnerId                          String                           @id @unique(map: "learner_id_UNIQUE") @map("learner_id") @db.Char(36)
+  user_id                            String                           @db.Char(36)
+  is_enrolled_college                Int                              @db.TinyInt
+  edu_institution_id                 String?                          @db.Char(36)
+  degree_type                        String                           @db.VarChar(45)
+  intern_hours_required              Int                              @db.TinyInt
+  major                              String?                          @db.VarChar(45)
+  minor                              String?                          @db.VarChar(45)
+  edu_institution                    EdInstitution?                   @relation(fields: [edu_institution_id], references: [edInstitutionId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_edu_institution1")
+  user                               User                             @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "fk_learner_user1")
   learner_private_data               learner_private_data[]
   learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
   learner_skill_gap_data             learner_skill_gap_data[]
@@ -98,7 +98,6 @@ model LearnerProjBasedTechAssessment {
 
   @@index([proj_based_tech_assessment_id], map: "fk_user_has_proj_based_tech_assessment_proj_based_tech_as_idx")
   @@index([learner_id], map: "fk_user_has_proj_based_tech_assessment_user1_idx")
-
   @@map("learner_proj_based_tech_assessment")
 }
 
@@ -134,11 +133,11 @@ model mentor_has_skill {
 }
 
 model proj_based_tech_assessment {
-  proj_based_tech_assessment_id      String                               @unique(map: "proj_based_tech_assessment_id_UNIQUE") @db.Char(36)
-  skill_category_id                  String                               @db.Char(36)
-  url                                String                               @db.VarChar(255)
+  proj_based_tech_assessment_id      String                           @unique(map: "proj_based_tech_assessment_id_UNIQUE") @db.Char(36)
+  skill_category_id                  String                           @db.Char(36)
+  url                                String                           @db.VarChar(255)
   learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
-  skill_category                     skill_category                       @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proj_based_tech_assessment_skill_category1")
+  skill_category                     skill_category                   @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proj_based_tech_assessment_skill_category1")
 
   @@id([proj_based_tech_assessment_id, skill_category_id])
   @@index([skill_category_id], map: "fk_proj_based_tech_assessment_skill_category1_idx")
@@ -198,11 +197,11 @@ model skill_category {
 }
 
 model training_program {
-  training_programs_id String            @id @unique(map: "training_program_id_UNIQUE") @db.Char(36)
-  training_provider_id String            @db.Char(36)
-  skill_category_id    String            @db.Char(36)
+  training_program_id String           @id @unique(map: "training_program_id_UNIQUE") @db.Char(36)
+  training_provider_id String           @db.Char(36)
+  skill_category_id    String           @db.Char(36)
   training_provider    trainingProvider @relation(fields: [training_provider_id], references: [training_provider_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_program_training_provider1")
-  skill_category       skill_category    @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_programs_skill_category1")
+  skill_category       skill_category   @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_programs_skill_category1")
 
   @@index([skill_category_id], map: "fk_training_program_skill_category1_idx")
   @@index([training_provider_id], map: "fk_training_program_training_provider1_idx")
@@ -218,15 +217,14 @@ model trainingProvider {
 
   @@index([edu_institution_id], map: "fk_training_provider_edu_institution1_idx")
   @@index([user_id], map: "fk_training_provider_user1_idx")
-
   @@map("training_provider")
 }
 
 model User {
-  userId            String              @id @unique(map: "user_id_UNIQUE") @map("user_id") @db.Char(36)
-  userName          String              @map("user_name") @db.VarChar(255)
-  password          String              @db.VarChar(255)
-  email             String              @db.VarChar(255)
+  userId            String             @id @unique(map: "user_id_UNIQUE") @map("user_id") @db.Char(36)
+  userName          String             @map("user_name") @db.VarChar(45)
+  password          String             @db.VarChar(45)
+  email             String             @db.VarChar(45)
   employers         Employer[]
   learners          Learner[]
   mentors           mentor[]
@@ -236,7 +234,7 @@ model User {
 }
 
 enum JobListingPositionLoc {
-  on_site @map("on-site")
+  on_site @map("onSite")
   remote  @map("remote")
   hybrid  @map("hybrid")
 
@@ -244,8 +242,8 @@ enum JobListingPositionLoc {
 }
 
 enum SelfAssessmentQuestionType {
-  interest    @map("interest")
-  competency  @map("competency")
+  interest   @map("interest")
+  competency @map("competency")
 
   @@map("sa_question_question_type")
 }
