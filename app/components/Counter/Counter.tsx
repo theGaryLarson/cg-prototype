@@ -1,7 +1,7 @@
 'use client';
 
 /* Core */
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 /* Instruments */
 import {
@@ -14,7 +14,7 @@ import {
 } from '@/lib/redux';
 import styles from './counter.module.css';
 
-export const Counter = () => {
+export const Counter: React.FC = (): React.ReactElement => {
   const dispatch = useDispatch();
   const count = useSelector(selectCount);
   const [incrementAmount, setIncrementAmount] = useState(2);
