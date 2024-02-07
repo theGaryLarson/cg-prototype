@@ -3,6 +3,92 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
+const NUM_SKILL_CATEGORIES = 15;
+const NUM_SKILLS = 15 * 5; // five skills in each category
+const NUM_ED_INSTITUTIONS = 10;
+const NUM_LEARNERS = 20;
+
+interface SkillData {
+  skill_id: string;
+  skill_category_id: string;
+  skill_name: string;
+  skill_description: string;
+}
+
+function generateSkillData(skillCategoryId: string): SkillData {
+  return {
+    skill_id: faker.string.uuid(),
+    skill_category_id: skillCategoryId,
+    skill_name: faker.commerce.productName(),
+    skill_description: faker.lorem.sentence(),
+  };
+}
+
+async function createSkillData(skillCategories: SkillCategoryData[]): Promise<SkillData> {
+  // TODO: fix mapping to skill category ids
+  const skill = generateSkillData(skillCategories[0].skill_category_id);
+  await prisma.skill.create({
+    data: skill,
+  });
+  console.log(`Created skill with ID: ${skill.skill_id}`);
+  return skill;
+}
+interface LearnerData {
+  learnerId: string;
+  user_id: string;
+  is_enrolled_college: number;
+  edu_institution_id?: string | null; // Optional
+  degree_type: string;
+  intern_hours_required: number;
+  major: string | null;
+  minor: string | null;
+}
+
+function generateLearnerData(userId: string, eduInstitutionId?: string | null): LearnerData {
+  const isEnrolledInCollege = faker.number.int({ min: 0, max: 1 });
+  return {
+    learnerId: faker.string.uuid(),
+    user_id: userId,
+    is_enrolled_college: isEnrolledInCollege,
+    edu_institution_id: isEnrolledInCollege === 0 ? null : eduInstitutionId,
+    degree_type: faker.helpers.arrayElement([
+      'Associate',
+      'Bachelors',
+      'Certification',
+      'Online-Course',
+    ]),
+    intern_hours_required: faker.number.int({ min: 0, max: 1 }),
+    major: faker.person.jobArea(),
+    minor: faker.datatype.boolean() ? faker.person.jobArea() : 'none',
+  };
+}
+
+async function createLearner(
+  userId: string,
+  eduInstitutionId?: string | null,
+): Promise<LearnerData> {
+  const learnerData = generateLearnerData(userId, eduInstitutionId);
+
+  const learner = await prisma.learner.create({
+    data: learnerData,
+  });
+  console.log(`Created Learner with ID: ${learner.learnerId}`);
+  return learner;
+}
+async function seedLearners(
+  users: UserData[],
+  eduInstitutions: EdInstitutionData[],
+): Promise<void> {
+  for (let i = 0; i < NUM_LEARNERS; i++) {
+    // TODO: fix: if NUM_LEARNERS > users.length will create duplicated users as learners.
+    const userId = users[i % users.length].userId; // Cycle through users
+    // TODO: fix logic here
+    const eduInstitutionId =
+      i % 2 === 0 ? eduInstitutions[i % eduInstitutions.length].edInstitutionId : undefined;
+    await createLearner(userId, eduInstitutionId);
+  }
+}
+
 interface SkillCategoryData {
   skill_category_id: string;
   category_name: string;
@@ -18,16 +104,20 @@ function generateSkillCategoryData(): SkillCategoryData {
 }
 
 async function createSkillCategory(): Promise<SkillCategoryData> {
-  const skillCategoryData = generateSkillCategoryData();
-
-  const skillCategory = await prisma.skill_category.create({
+  const skillCategoryData: SkillCategoryData = generateSkillCategoryData();
+  const skillCategory: SkillCategoryData = await prisma.skill_category.create({
     data: skillCategoryData,
   });
   console.log(`Created skill_category with ID: ${skillCategory.skill_category_id}`);
   return skillCategory;
 }
 
-interface JobListingSkillCategoryData {
+async function seedSkillCategories(): Promise<void> {
+  for (let i = 0; i < NUM_SKILL_CATEGORIES; i++) {
+    await createSkillCategory();
+  }
+}
+interface JobListingHasSkillCategoryData {
   job_listing_has_skill_category_id: string;
   job_listing_id: string;
   skill_category_id: string;
@@ -36,7 +126,7 @@ interface JobListingSkillCategoryData {
 function generateJobListingSkillCategoryData(
   jobListingId: string,
   skillCategoryId: string,
-): JobListingSkillCategoryData {
+): JobListingHasSkillCategoryData {
   return {
     job_listing_has_skill_category_id: faker.string.uuid(),
     job_listing_id: jobListingId,
@@ -44,7 +134,7 @@ function generateJobListingSkillCategoryData(
   };
 }
 
-async function createJobListingSkillCategory(
+async function createJobListingHasSkillCategory(
   jobListingId: string,
   skillCategoryId: string,
 ): Promise<void> {
@@ -117,13 +207,29 @@ async function createEdInstitution(): Promise<EdInstitutionData> {
   return edInstitution;
 }
 
-async function createUser(): Promise<any> {
-  const userData = {
+async function seedEdInstitution(): Promise<void> {
+  for (let i = 0; i < NUM_ED_INSTITUTIONS; i++) {
+    await createEdInstitution();
+  }
+}
+
+interface UserData {
+  userId: string;
+  userName: string;
+  password: string;
+  email: string;
+}
+
+function generateUserData(): UserData {
+  return {
     userId: faker.string.uuid(),
     userName: faker.internet.userName(),
     password: faker.string.hexadecimal({ length: 64, casing: 'lower' }), // 32-byte hashed password
     email: faker.internet.email(),
   };
+}
+async function createUser(): Promise<UserData> {
+  const userData = generateUserData();
 
   const user = await prisma.user.create({
     data: userData,
@@ -166,11 +272,19 @@ async function main(): Promise<void> {
   const entries = 3; // Number of entries you want to create
   for (let i = 0; i < entries; i++) {
     const user: { userId: string } = await createUser();
+    const edInstitution: EdInstitutionData = await createEdInstitution();
     const employer: EmployerData = await createEmployer(user.userId);
+    /* const learner: LearnerData = */ await createLearner(
+      user.userId,
+      edInstitution.edInstitutionId,
+    );
     const jobListing: JobListingData = await createJobListing(employer.employerId);
-    /* const edInstitution: EdInstitutionData = */ await createEdInstitution();
+
     const skillCategory = await createSkillCategory();
-    await createJobListingSkillCategory(jobListing.job_listing_id, skillCategory.skill_category_id);
+    await createJobListingHasSkillCategory(
+      jobListing.job_listing_id,
+      skillCategory.skill_category_id,
+    );
   }
   console.log(`Seeded ${entries} entries for each table.`);
 }
