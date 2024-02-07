@@ -5,13 +5,13 @@ module.exports = {
         node: true,
     },
     extends: [
-        'next',
+        // 'next',
         'next/core-web-vitals',
-        'standard-with-typescript',
-        'plugin:react/recommended',
-        'eslint:recommended',
-        'plugin:react-hooks/recommended',
-        'prettier',
+        // 'standard-with-typescript',
+        // 'plugin:react/recommended',
+        // 'eslint:recommended',
+        // 'plugin:react-hooks/recommended',
+        // 'prettier',
     ],
     overrides: [
         {
@@ -19,6 +19,7 @@ module.exports = {
             excludedFiles: '*.ts, *.tsx',
             rules: {
                 '@typescript-eslint/*': 'off',
+                '@typescript-eslint/no-unused-vars': 'off'
             },
             parserOptions: {
                 sourceType: 'script',
@@ -35,9 +36,9 @@ module.exports = {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
         'promise/param-names': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'warn',
+        // '@typescript-eslint/explicit-function-return-type': 'warn',
         '@typescript-eslint/no-misused-promises': 'off',
         'prettier/prettier': 'warn',
-        '@typescript-eslint/no-unused-vars': 'off'
+
     },
 };
