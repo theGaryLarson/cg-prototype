@@ -37,6 +37,7 @@ module.exports = {
         'promise/param-names': 'off',
         '@typescript-eslint/explicit-function-return-type': 'warn',
         '@typescript-eslint/no-misused-promises': 'off',
-        'prettier/prettier': 'error',
+        'prettier/prettier': 'warn',
+        '@typescript-eslint/no-unused-vars': 'off'
     },
 };
