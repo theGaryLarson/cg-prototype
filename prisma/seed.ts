@@ -3,10 +3,14 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
+const NUM_USERS = 30;
+const NUM_JOB_SKILL_RELATIONSHIPS = 50;
+// const NUM_MENTORS = 10;
 const NUM_SKILL_CATEGORIES = 15;
 const NUM_SKILLS = 15 * 5; // five skills in each category
 const NUM_ED_INSTITUTIONS = 10;
 const NUM_LEARNERS = 20;
+const NUM_EMPLOYERS = 20;
 
 interface SkillData {
   skill_id: string;
@@ -24,15 +28,23 @@ function generateSkillData(skillCategoryId: string): SkillData {
   };
 }
 
-async function createSkillData(skillCategories: SkillCategoryData[]): Promise<SkillData> {
-  // TODO: fix mapping to skill category ids
-  const skill = generateSkillData(skillCategories[0].skill_category_id);
+async function createSkillData(skillCategoryId: string): Promise<SkillData> {
+  const skill: SkillData = generateSkillData(skillCategoryId);
   await prisma.skill.create({
     data: skill,
   });
   console.log(`Created skill with ID: ${skill.skill_id}`);
   return skill;
 }
+
+async function seedSkillData(skillCategories: SkillCategoryData[]): Promise<void> {
+  for (let i = 0; i < NUM_SKILLS; i++) {
+    await createSkillData(skillCategories[i % skillCategories.length].skill_category_id);
+  }
+}
+
+/// ///////////////////////////////////////////////////////////
+
 interface LearnerData {
   learnerId: string;
   user_id: string;
@@ -89,6 +101,8 @@ async function seedLearners(
   }
 }
 
+/// ///////////////////////////////////////////////////////////
+
 interface SkillCategoryData {
   skill_category_id: string;
   category_name: string;
@@ -117,6 +131,9 @@ async function seedSkillCategories(): Promise<void> {
     await createSkillCategory();
   }
 }
+
+/// ///////////////////////////////////////////////////////////
+
 interface JobListingHasSkillCategoryData {
   job_listing_has_skill_category_id: string;
   job_listing_id: string;
@@ -150,6 +167,21 @@ async function createJobListingHasSkillCategory(
     `Created JobListingSkillCategory with ID: ${jobListingSkillCategory.job_listing_has_skill_category_id}`,
   );
 }
+
+async function seedJobListingHasSkillCategory(
+  jobListings: JobListingData[],
+  skillCategories: SkillCategoryData[],
+): Promise<void> {
+  for (let i = 0; i < NUM_JOB_SKILL_RELATIONSHIPS; i++) {
+    await createJobListingHasSkillCategory(
+      // TODO: fine tune mapping of these to be more meaningful
+      jobListings[i % jobListings.length].job_listing_id,
+      skillCategories[i % skillCategories.length].skill_category_id,
+    );
+  }
+}
+
+/// ///////////////////////////////////////////////////////////
 
 interface JobListingData {
   job_listing_id: string;
@@ -238,6 +270,11 @@ async function createUser(): Promise<UserData> {
   return user; // Return the created user for possible relational data seeding
 }
 
+async function seedUser(): Promise<void> {
+  for (let i = 0; i < NUM_USERS; i++) {
+    await createUser();
+  }
+}
 interface EmployerData {
   employerId: string;
   user_id: string;
@@ -268,6 +305,11 @@ async function createEmployer(userId: string): Promise<EmployerData> {
   return employer;
 }
 
+async function seedEmployers(users: UserData[]): Promise<void> {
+  for (let i = 0; i < NUM_EMPLOYERS; i++) {
+    await createEmployer(users[i % users.length].userId);
+  }
+}
 async function main(): Promise<void> {
   const entries = 3; // Number of entries you want to create
   for (let i = 0; i < entries; i++) {
