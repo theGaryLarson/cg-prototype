@@ -123,13 +123,13 @@ model mentor {
 
 model mentor_has_skill {
   mentor_has_skill_id              String         @id @unique(map: "mentor_has_skill_id_UNIQUE") @db.Char(36)
-  skill_category_skill_category_id String         @db.Char(36)
-  mentor_mentor_id                 String         @db.Char(36)
-  mentor                           mentor         @relation(fields: [mentor_mentor_id], references: [mentor_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_mentor1")
-  skill_category                   skill_category @relation(fields: [skill_category_skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_skill_category1")
+  skill_category_id                String         @db.Char(36)
+  mentor_id                        String         @db.Char(36)
+  mentor                           mentor         @relation(fields: [mentor_id], references: [mentor_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_mentor1")
+  skill_category                   skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_skill_category1")
 
-  @@index([mentor_mentor_id], map: "fk_skill_category_has_mentor_mentor1_idx")
-  @@index([skill_category_skill_category_id], map: "fk_skill_category_has_mentor_skill_category1_idx")
+  @@index([mentor_id], map: "fk_skill_category_has_mentor_mentor1_idx")
+  @@index([skill_category_id], map: "fk_skill_category_has_mentor_skill_category1_idx")
 }
 
 model proj_based_tech_assessment {
@@ -173,7 +173,7 @@ model self_assessment {
   @@index([skill_category_id], map: "fk_self_assessment_skill_category1")
 }
 
-model skill {
+model Skill {
   skill_id          String         @id @unique(map: "skill_id_UNIQUE") @db.Char(36)
   skill_category_id String         @db.Char(36)
   skill_name        String         @db.VarChar(45)
@@ -181,6 +181,7 @@ model skill {
   skill_category    skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_skill_category")
 
   @@index([skill_category_id], map: "fk_skill_skill_category_idx")
+  @@map("skill")
 }
 
 model skill_category {
@@ -192,7 +193,7 @@ model skill_category {
   mentor_has_skill           mentor_has_skill[]
   proj_based_tech_assessment proj_based_tech_assessment[]
   self_assessment            self_assessment[]
-  skill                      skill[]
+  skill                      Skill[]
   training_program           training_program[]
 }
 
