@@ -1,4 +1,9 @@
-import { PrismaClient, JobListingPositionLoc } from '@prisma/client';
+import {
+  JobListingPositionLoc,
+  PrismaClient,
+  SelfAssessmentQuestionType,
+  User,
+} from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -11,6 +16,408 @@ const NUM_SKILL_CATEGORIES = 10;
 const NUM_SKILLS = NUM_SKILL_CATEGORIES * 5; // five skills in each category
 const NUM_JOB_SKILL_RELATIONSHIPS = 50;
 const NUM_ED_INSTITUTIONS = 10;
+
+/// ///////////////////////////////////////////////////////////
+
+interface SAQuestionData {
+  sa_question_id: string;
+  self_assessment_id: string;
+  sa_question_text: string;
+  question_type: SelfAssessmentQuestionType;
+}
+
+function generateSAQuestionData(
+  selfAssessmentId: string,
+  questionType: SelfAssessmentQuestionType,
+): SAQuestionData {
+  return {
+    sa_question_id: faker.string.uuid(),
+    self_assessment_id: selfAssessmentId,
+    sa_question_text: faker.lorem.sentence(),
+    question_type: questionType,
+  };
+}
+
+async function fetchSAQuestionDependencies(): Promise<SelfAssessmentData[]> {
+  return prisma.self_assessment.findMany();
+}
+
+async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<SAQuestionData> {
+  return prisma.sa_question.create({
+    data: {
+      sa_question_id: SAQuestionDataObject.sa_question_id,
+      self_assessment_id: SAQuestionDataObject.self_assessment_id,
+      sa_question_text: SAQuestionDataObject.sa_question_text,
+      question_type: SAQuestionDataObject.question_type,
+      sa_possible_answer: {
+        create: [
+          {
+            sa_possible_answer_id: faker.string.uuid(),
+            answer_text: faker.lorem.sentence(),
+            is_correct: true,
+          },
+          {
+            sa_possible_answer_id: faker.string.uuid(),
+            answer_text: faker.lorem.sentence(),
+            is_correct: false,
+          },
+          {
+            sa_possible_answer_id: faker.string.uuid(),
+            answer_text: faker.lorem.sentence(),
+          },
+        ],
+      },
+    },
+  });
+}
+async function seedSAQuestions(): Promise<void> {
+  console.log('Seeding Self Assessment Questions...');
+  const selfAssessments = await fetchSAQuestionDependencies();
+  const questionTypes = [
+    SelfAssessmentQuestionType.interest,
+    SelfAssessmentQuestionType.competency,
+  ];
+
+  for (const assessment of selfAssessments) {
+    // creates an interest and competency question for each self-assessment
+    for (const type of questionTypes) {
+      const saQuestionData = generateSAQuestionData(assessment.self_assessment_id, type);
+      await createSAQuestion(saQuestionData);
+    }
+  }
+
+  console.log('Seeded SA_Questions.');
+}
+/// ///////////////////////////////////////////////////////////
+
+interface LearnerPrivateData {
+  learner_private_data_id: string;
+  learner_id: string;
+  ssn: string | null;
+}
+
+function generateLearnerPrivateData(learnerId: string, ssn: string | null): LearnerPrivateData {
+  return {
+    learner_private_data_id: faker.string.uuid(),
+    learner_id: learnerId,
+    ssn: ssn,
+  };
+}
+
+async function fetchLearnerPrivateDataDependencies(): Promise<LearnerData[]> {
+  return prisma.learner.findMany();
+}
+
+async function createLearnerPrivateData(
+  learnerPrivateDataObject: LearnerPrivateData,
+): Promise<LearnerPrivateData> {
+  const createdRecord: LearnerPrivateData = await prisma.learner_private_data.create({
+    data: learnerPrivateDataObject,
+  });
+  console.log(
+    `Created LearnerPrivateData Record with ID: ${createdRecord.learner_private_data_id}`,
+  );
+  return createdRecord;
+}
+
+async function seedLearnerPrivateData(): Promise<void> {
+  console.log('Seeding Learner Private Data...');
+  const learners = await fetchLearnerPrivateDataDependencies();
+
+  for (const learner of learners) {
+    // Decide whether to include an SSN based on 20% probability
+    const includeSSN = Math.random() >= 0.2; // 80% chance to include, 20% to exclude
+    const ssn = includeSSN ? faker.number.int({ min: 100000000, max: 999999999 }).toString() : null;
+
+    const learnerPrivateData = generateLearnerPrivateData(learner.learnerId, ssn);
+    await createLearnerPrivateData(learnerPrivateData);
+  }
+
+  console.log('Seeded learner private data with 20% entries having null SSN.');
+}
+
+/// ///////////////////////////////////////////////////////////
+interface SelfAssessmentData {
+  self_assessment_id: string;
+  skill_category_id: string;
+}
+
+function generateSelfAssessmentData(skillCategoryId: string): SelfAssessmentData {
+  return {
+    self_assessment_id: faker.string.uuid(),
+    skill_category_id: skillCategoryId,
+  };
+}
+
+async function fetchSelfAssessmentDependencies(): Promise<SkillCategoryData[]> {
+  return prisma.skill_category.findMany();
+}
+
+async function createSelfAssessment(
+  selfAssessmentDataObject: SelfAssessmentData,
+): Promise<SelfAssessmentData> {
+  const createdRecord: SelfAssessmentData = await prisma.self_assessment.create({
+    data: selfAssessmentDataObject,
+  });
+  console.log(`created self assessment record with id: ${createdRecord.self_assessment_id}`);
+  return createdRecord;
+}
+
+async function seedSelfAssessments(): Promise<void> {
+  console.log('Seeding Self Assessments...');
+  const skillCategories: SkillCategoryData[] = await fetchSelfAssessmentDependencies();
+
+  // Iterate through each skill category to create a self-assessment
+  for (const skillCategory of skillCategories) {
+    const selfAssessmentDataObject: SelfAssessmentData = generateSelfAssessmentData(
+      skillCategory.skill_category_id,
+    );
+    await createSelfAssessment(selfAssessmentDataObject);
+  }
+
+  console.log(`Created self-assessment records for each skill category.`);
+}
+
+/// ///////////////////////////////////////////////////////////
+interface LearnerSkillGapData {
+  learner_skill_gap_data_id: string;
+  learner_id: string;
+  skill_category_id: string;
+}
+
+function generateLearnerSkillGapData(
+  learnerId: string,
+  skillCategoryId: string,
+): LearnerSkillGapData {
+  return {
+    learner_skill_gap_data_id: faker.string.uuid(),
+    learner_id: learnerId,
+    skill_category_id: skillCategoryId,
+  };
+}
+
+async function createLearnerSkillGapData(
+  learnerSkillGapDataObject: LearnerSkillGapData,
+): Promise<LearnerSkillGapData> {
+  return prisma.learner_skill_gap_data.create({
+    data: {
+      learner_skill_gap_data_id: learnerSkillGapDataObject.learner_skill_gap_data_id,
+      learner_id: learnerSkillGapDataObject.learner_id,
+      skill_category_id: learnerSkillGapDataObject.skill_category_id,
+    },
+  });
+}
+
+async function fetchLearnSkillGapDependencies(): Promise<{
+  learners: LearnerData[];
+  skillCategories: SkillCategoryData[];
+}> {
+  const learners: LearnerData[] = await prisma.learner.findMany();
+  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+
+  return { learners, skillCategories };
+}
+
+async function seedLearnSkillGaps(): Promise<void> {
+  console.log('Seeding Learner Skill Gaps...');
+  const { learners, skillCategories } = await fetchLearnSkillGapDependencies();
+  // Iterate over learners
+  for (const learner of learners) {
+    // Assuming we want to associate each learner with a subset of all skill categories
+    // For simplicity, let's select a random skill category for each learner
+    const selectedSkillCategory =
+      skillCategories[Math.floor(Math.random() * skillCategories.length)];
+
+    // Generate learner skill gap data
+    const learnerSkillGapData = generateLearnerSkillGapData(
+      learner.learnerId,
+      selectedSkillCategory.skill_category_id,
+    );
+
+    // Create learner skill gap data record
+    await createLearnerSkillGapData(learnerSkillGapData);
+  }
+
+  console.log('Learner skill gap data seeding completed.');
+}
+
+/// ///////////////////////////////////////////////////////////
+
+interface LearnerProjBasedTechAssessmentData {
+  learner_proj_based_tech_assessment_id: string;
+  learner_id: string;
+  proj_based_tech_assessment_id: string;
+  attempt_date: Date;
+  has_passed: number;
+}
+
+function generateLearnerProjBasedTechAssessmentData(
+  learnerId: string,
+  projBasedTechAssessmentId: string,
+): LearnerProjBasedTechAssessmentData {
+  return {
+    learner_proj_based_tech_assessment_id: faker.string.uuid(), // generate manually as prisma does NOT handle autogenerate of uuid
+    learner_id: learnerId,
+    proj_based_tech_assessment_id: projBasedTechAssessmentId,
+    attempt_date: faker.date.past(),
+    has_passed: Math.random() < 0.5 ? 1 : 0,
+  };
+}
+
+async function createLearnerProjBasedTechAssessment(
+  techAssessmentDataObject: LearnerProjBasedTechAssessmentData,
+): Promise<LearnerProjBasedTechAssessmentData> {
+  const createdRecord = await prisma.learnerProjBasedTechAssessment.create({
+    data: {
+      learner_proj_based_tech_assessment_id:
+        techAssessmentDataObject.learner_proj_based_tech_assessment_id,
+      learner: {
+        connect: { learnerId: techAssessmentDataObject.learner_id },
+      },
+      proj_based_tech_assessment: {
+        connect: {
+          proj_based_tech_assessment_id: techAssessmentDataObject.proj_based_tech_assessment_id,
+        },
+      },
+      attempt_date: techAssessmentDataObject.attempt_date,
+      has_passed: techAssessmentDataObject.has_passed,
+    },
+  });
+
+  console.log(
+    `LearnerProjBasedTechAssessment created with ID: ${createdRecord.learner_proj_based_tech_assessment_id}`,
+  ); // Assuming 'id' is the automatically generated ID by Prisma/DB
+  return createdRecord;
+}
+
+async function fetchLearnerProjBasedTechAssessmentDependencies() {
+  const learners: LearnerData[] = await prisma.learner.findMany();
+  const projBasedTechAssessments: TechAssessmentData[] =
+    await prisma.proj_based_tech_assessment.findMany();
+
+  return { learners, projBasedTechAssessments };
+}
+async function seedLearnerProjBasedTechAssessments(): Promise<void> {
+  console.log('Seeding Learner Project-Based Tech Assessments...');
+  // Fetch logic is needed to get learners and projBasedTechAssessments
+  const { learners, projBasedTechAssessments } =
+    await fetchLearnerProjBasedTechAssessmentDependencies();
+
+  for (const learner of learners) {
+    const projBasedTechAssessment =
+      projBasedTechAssessments[Math.floor(Math.random() * projBasedTechAssessments.length)];
+    // Create record with generated data
+    const createdRecord = generateLearnerProjBasedTechAssessmentData(
+      learner.learnerId,
+      projBasedTechAssessment.proj_based_tech_assessment_id,
+    );
+    await createLearnerProjBasedTechAssessment(createdRecord);
+  }
+}
+
+/// ///////////////////////////////////////////////////////////
+
+interface TechAssessmentData {
+  proj_based_tech_assessment_id: string;
+  skill_category_id: string;
+  title: string;
+  url: string;
+}
+
+function generateTechAssessmentData(skillCategoryId: string, title: string): TechAssessmentData {
+  return {
+    proj_based_tech_assessment_id: faker.string.uuid(),
+    skill_category_id: skillCategoryId,
+    title: title,
+    url: faker.internet.url(),
+  };
+}
+
+async function fetchTechAssessmentDependencies(): Promise<SkillCategoryData[]> {
+  return prisma.skill_category.findMany();
+}
+
+async function createTechAssessment(
+  techAssessmentDataObject: TechAssessmentData,
+): Promise<TechAssessmentData> {
+  const createdRecord = await prisma.proj_based_tech_assessment.create({
+    data: techAssessmentDataObject,
+  });
+  console.log(
+    `Create Tech Assessment record with ID: ${techAssessmentDataObject.proj_based_tech_assessment_id}`,
+  );
+  return createdRecord;
+}
+
+async function seedProjBasedTechAssessments(): Promise<void> {
+  console.log('Seeding Project-Based Tech Assessments...');
+  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  for (const skillCategory of skillCategories) {
+    // Generate a title by appending "Assessment" to the skill category's name
+    const title = `${skillCategory.category_name} Assessment`;
+
+    // Generate tech assessment data with the custom title
+    const techAssessmentData = generateTechAssessmentData(skillCategory.skill_category_id, title);
+
+    // Create the tech assessment record in the database
+    await createTechAssessment(techAssessmentData);
+  }
+
+  console.log('Tech assessments seeded for each skill category.');
+}
+
+/// ///////////////////////////////////////////////////////////
+
+interface TrainingProgramData {
+  training_program_id: string;
+  training_provider_id: string;
+  skill_category_id: string;
+}
+
+// Function to generate training program data
+function generateTrainingProgramData(
+  trainingProviderId: string,
+  skillCategoryId: string,
+): TrainingProgramData {
+  return {
+    training_program_id: faker.string.uuid(),
+    training_provider_id: trainingProviderId,
+    skill_category_id: skillCategoryId,
+  };
+}
+
+async function createTrainingProgram(
+  trainingProviderId: string,
+  skillCategoryId: string,
+): Promise<TrainingProgramData> {
+  const trainingProgramData = generateTrainingProgramData(trainingProviderId, skillCategoryId);
+  await prisma.training_program.create({
+    data: trainingProgramData,
+  });
+  console.log(`TrainingProgram created with ID: ${trainingProgramData.training_program_id}`);
+  return trainingProgramData;
+}
+
+async function fetchTrainingProgramDependencies(): Promise<{
+  trainingProviders: TrainingProviderData[];
+  skillCategories: SkillCategoryData[];
+}> {
+  const trainingProviders = await prisma.trainingProvider.findMany();
+  const skillCategories = await prisma.skill_category.findMany();
+  return { trainingProviders, skillCategories };
+}
+
+async function seedTrainingPrograms(): Promise<void> {
+  console.log('Seeding Training Programs...');
+  const { trainingProviders, skillCategories } = await fetchTrainingProgramDependencies();
+  for (const trainingProvider of trainingProviders) {
+    const skillCategory = skillCategories[Math.floor(Math.random() * skillCategories.length)];
+    await createTrainingProgram(
+      trainingProvider.training_provider_id,
+      skillCategory.skill_category_id,
+    );
+  }
+}
 
 /// ///////////////////////////////////////////////////////////
 
@@ -43,21 +450,22 @@ async function createTrainingProvider(
   return trainingProvider;
 }
 
-async function fetchUsersAndEdInstitutions(): Promise<{
+async function fetchTrainingProviderDependencies(): Promise<{
   users: UserData[];
   eduInstitutions: EdInstitutionData[];
 }> {
-  const users = await prisma.user.findMany({
+  const users: UserData[] = await prisma.user.findMany({
     take: 10,
   });
-  const eduInstitutions = await prisma.edInstitution.findMany({
+  const eduInstitutions: EdInstitutionData[] = await prisma.edInstitution.findMany({
     take: 10,
   });
   return { users, eduInstitutions };
 }
 
 async function seedTrainingProviders(): Promise<void> {
-  const { users, eduInstitutions } = await fetchUsersAndEdInstitutions();
+  console.log('Seeding Training Providers...');
+  const { users, eduInstitutions } = await fetchTrainingProviderDependencies();
 
   // TODO: make meaningful. Assuming you want to create a training provider for each user
   for (const user of users) {
@@ -78,6 +486,9 @@ interface SkillData {
   skill_description: string;
 }
 
+async function fetchSkillDataDependencies(): Promise<SkillCategoryData[]> {
+  return prisma.skill_category.findMany();
+}
 function generateSkillData(skillCategoryId: string): SkillData {
   return {
     skill_id: faker.string.uuid(),
@@ -96,7 +507,9 @@ async function createSkill(skillCategoryId: string): Promise<SkillData> {
   return skill;
 }
 
-async function seedSkillData(skillCategories: SkillCategoryData[]): Promise<void> {
+async function seedSkillData(): Promise<void> {
+  console.log('Seeding Skills...');
+  const skillCategories = await fetchSkillDataDependencies();
   for (let i = 0; i < NUM_SKILLS; i++) {
     await createSkill(skillCategories[i % skillCategories.length].skill_category_id);
   }
@@ -113,6 +526,15 @@ interface LearnerData {
   intern_hours_required: number;
   major: string | null;
   minor: string | null;
+}
+
+async function fetchLearnerDependencies(): Promise<{
+  users: UserData[];
+  edInstitutions: EdInstitutionData[];
+}> {
+  const users: UserData[] = await prisma.user.findMany();
+  const edInstitutions: EdInstitutionData[] = await prisma.edInstitution.findMany();
+  return { users, edInstitutions };
 }
 
 function generateLearnerData(userId: string, eduInstitutionId?: string | null): LearnerData {
@@ -147,16 +569,15 @@ async function createLearner(
   return learner;
 }
 
-async function seedLearners(
-  users: UserData[],
-  eduInstitutions: EdInstitutionData[],
-): Promise<void> {
+async function seedLearners(): Promise<void> {
+  console.log('Seeding Learners...');
+  const { users, edInstitutions } = await fetchLearnerDependencies();
   for (let i = 0; i < NUM_LEARNERS; i++) {
     // TODO: fix: if NUM_LEARNERS > users.length will create duplicated users as learners.
     const userId = users[i % users.length].userId; // Cycle through users
     // TODO: fix logic here
     const eduInstitutionId =
-      i % 2 === 0 ? eduInstitutions[i % eduInstitutions.length].edInstitutionId : undefined;
+      i % 2 === 0 ? edInstitutions[i % edInstitutions.length].edInstitutionId : undefined;
     await createLearner(userId, eduInstitutionId);
   }
 }
@@ -186,10 +607,13 @@ async function createSkillCategory(): Promise<SkillCategoryData> {
   return skillCategory;
 }
 
-async function seedSkillCategories(): Promise<void> {
+async function seedSkillCategories(): Promise<SkillCategoryData[]> {
+  console.log('Seeding Skill Categories...');
+  const skillCategories: SkillCategoryData[] = [];
   for (let i = 0; i < NUM_SKILL_CATEGORIES; i++) {
-    await createSkillCategory();
+    skillCategories.push(await createSkillCategory());
   }
+  return skillCategories;
 }
 
 /// ///////////////////////////////////////////////////////////
@@ -198,6 +622,16 @@ interface JobListingHasSkillCategoryData {
   job_listing_has_skill_category_id: string;
   job_listing_id: string;
   skill_category_id: string;
+}
+
+async function fetchJobListingSkillCategoryDependencies(): Promise<{
+  jobListings: JobListingData[];
+  skillCategories: SkillCategoryData[];
+}> {
+  const jobListings: JobListingData[] = await prisma.jobListing.findMany();
+  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+
+  return { jobListings, skillCategories };
 }
 
 function generateJobListingSkillCategoryData(
@@ -228,10 +662,9 @@ async function createJobListingHasSkillCategory(
   );
 }
 
-async function seedJobListingHasSkillCategory(
-  jobListings: JobListingData[],
-  skillCategories: SkillCategoryData[],
-): Promise<void> {
+async function seedJobListingHasSkillCategory(): Promise<void> {
+  console.log('Seeding Job Listing Skill Categories...');
+  const { jobListings, skillCategories } = await fetchJobListingSkillCategoryDependencies();
   for (let i = 0; i < NUM_JOB_SKILL_RELATIONSHIPS; i++) {
     await createJobListingHasSkillCategory(
       // TODO: fine tune mapping of these to be more meaningful
@@ -246,19 +679,41 @@ async function seedJobListingHasSkillCategory(
 interface JobListingData {
   job_listing_id: string;
   employer_id: string;
+  job_title: string;
   position_loc: JobListingPositionLoc;
   salary_range: string;
   region: string;
 }
-
+async function fetchJobListingDependencies(): Promise<EmployerData[]> {
+  return prisma.employer.findMany();
+}
 function generateJobListingData(employerId: string): JobListingData {
   return {
     job_listing_id: faker.string.uuid(),
     employer_id: employerId,
-    position_loc: faker.helpers.arrayElement(Object.values(JobListingPositionLoc)), // Example usage of enum
-    salary_range: `${faker.number.int({ min: 50000, max: 200000 })}`,
-    region: faker.location.country(),
+    job_title: getRandomItJobTitle(),
+    position_loc: faker.helpers.arrayElement(Object.values(JobListingPositionLoc)),
+    salary_range: generateSalaryRange(),
+    region: faker.helpers.arrayElement(waCounties) + ' county',
   };
+}
+
+function generateSalaryRange() {
+  // Generate the minimum salary between $50,000 and $170,000
+  // This ensures there's room to add at least $30,000 for the maximum salary
+  const minSalary = faker.number.int({ min: 50000, max: 170000 });
+
+  // Ensure the maximum salary is at least $30,000 more than the minimum
+  const maxSalary = minSalary + 30000 + faker.number.int({ min: 0, max: 20000 });
+
+  // Format the salaries as strings with commas and prepend with '$'
+  const formatSalary = (salary: number) => `$${salary.toLocaleString()}`;
+
+  return `${formatSalary(minSalary)} - ${formatSalary(maxSalary)}`;
+}
+function getRandomItJobTitle() {
+  const index = Math.floor(Math.random() * itJobTitles.length);
+  return itJobTitles[index];
 }
 
 async function createJobListing(employerId: string): Promise<JobListingData> {
@@ -270,7 +725,20 @@ async function createJobListing(employerId: string): Promise<JobListingData> {
   return jobListingData;
 }
 
-async function seedJobListings() {}
+async function seedJobListings() {
+  console.log('Seeding Job Listings...');
+  //TODO: seed two unique job listings for each employer
+  const employers: EmployerData[] = await fetchJobListingDependencies();
+  for (const employer of employers) {
+    // Seed the first job listing
+    await createJobListing(employer.employerId);
+
+    // Seed the second job listing
+    await createJobListing(employer.employerId);
+  }
+
+  console.log(`Seeded two job listings for each of ${employers.length} employers.`);
+}
 
 /// ///////////////////////////////////////////////////////////
 
@@ -304,10 +772,12 @@ async function createEdInstitution(): Promise<EdInstitutionData> {
   return edInstitution;
 }
 
-async function seedEdInstitutions(): Promise<void> {
+async function seedEdInstitutions(): Promise<EdInstitutionData[]> {
+  const edInstitutions: EdInstitutionData[] = [];
   for (let i = 0; i < NUM_ED_INSTITUTIONS; i++) {
-    await createEdInstitution();
+    edInstitutions.push(await createEdInstitution());
   }
+  return edInstitutions;
 }
 
 /// ///////////////////////////////////////////////////////////
@@ -347,7 +817,8 @@ async function createMentorSkillRelation(
   return mentorSkillData;
 }
 
-async function seedMentorSKills() {
+async function seedMentorSkills() {
+  console.log('Seeding Mentor Skills...');
   const mentors = await prisma.mentor.findMany();
   const skillCategories = await prisma.skill_category.findMany();
 
@@ -370,6 +841,9 @@ interface EmployerData {
   logo_url: string | null;
 }
 
+async function fetchEmployerDependencies(): Promise<UserData[]> {
+  return prisma.user.findMany();
+}
 function generateEmployerData(userId: string): EmployerData {
   return {
     employerId: faker.string.uuid(),
@@ -391,7 +865,9 @@ async function createEmployer(userId: string): Promise<EmployerData> {
   return employer;
 }
 
-async function seedEmployers(users: UserData[]): Promise<void> {
+async function seedEmployers(): Promise<void> {
+  console.log('Seeding Employers...');
+  const users = await fetchEmployerDependencies();
   for (let i = 0; i < NUM_EMPLOYERS; i++) {
     await createEmployer(users[i % users.length].userId);
   }
@@ -421,6 +897,7 @@ async function createMentor(userId: string): Promise<MentorData> {
 }
 
 async function seedMentors(): Promise<void> {
+  console.log('Seeding Mentors...');
   const users = await prisma.user.findMany({ take: NUM_MENTORS }); // Adjust 'take' as needed
   for (const user of users) {
     await createMentor(user.userId);
@@ -456,28 +933,119 @@ async function createUser(): Promise<UserData> {
 }
 
 async function seedUser(): Promise<void> {
+  console.log('Seeding Users...');
   for (let i = 0; i < NUM_USERS; i++) {
     await createUser();
   }
 }
 
-async function main(): Promise<void> {
-  const entries = 3; // Number of entries you want to create
-  for (let i = 0; i < entries; i++) {
-    const user: { userId: string } = await createUser();
-    const edInstitution: EdInstitutionData = await createEdInstitution();
-    const employer: EmployerData = await createEmployer(user.userId);
-    /* const learner: LearnerData = */
-    await createLearner(user.userId, edInstitution.edInstitutionId);
-    const jobListing: JobListingData = await createJobListing(employer.employerId);
+const waCounties = [
+  'Adams',
+  'Asotin',
+  'Benton',
+  'Chelan',
+  'Clallam',
+  'Clark',
+  'Columbia',
+  'Cowlitz',
+  'Douglas',
+  'Ferry',
+  'Franklin',
+  'Garfield',
+  'Grant',
+  'Grays Harbor',
+  'Island',
+  'Jefferson',
+  'King',
+  'Kitsap',
+  'Kittitas',
+  'Klickitat',
+  'Lewis',
+  'Lincoln',
+  'Mason',
+  'Okanogan',
+  'Pacific',
+  'Pend Oreille',
+  'Pierce',
+  'San Juan',
+  'Skagit',
+  'Skamania',
+  'Snohomish',
+  'Spokane',
+  'Stevens',
+  'Thurston',
+  'Wahkiakum',
+  'Walla Walla',
+  'Whatcom',
+  'Whitman',
+  'Yakima',
+];
 
-    const skillCategory = await createSkillCategory();
-    await createJobListingHasSkillCategory(
-      jobListing.job_listing_id,
-      skillCategory.skill_category_id,
-    );
-  }
-  console.log(`Seeded ${entries} entries for each table.`);
+const itJobTitles = [
+  'Software Engineer',
+  'Systems Administrator',
+  'Web Developer',
+  'Database Administrator',
+  'Information Security Analyst',
+  'Cloud Solutions Architect',
+  'Network Engineer',
+  'DevOps Engineer',
+  'Data Scientist',
+  'IT Support Specialist',
+  'Full Stack Developer',
+  'Mobile Application Developer',
+  'User Experience Designer',
+  'IT Project Manager',
+  'Machine Learning Engineer',
+];
+async function main(): Promise<void> {
+  console.log('Seeding started...');
+
+  // Seed Users
+  await seedUser();
+
+  // Seed Skill Categories and Skills
+  const skillCategories = await seedSkillCategories();
+
+  await seedSkillData();
+
+  // Seed Training Providers
+  await seedTrainingProviders();
+
+  // Seed Training Programs
+  await seedTrainingPrograms();
+
+  // Seed Project-Based Tech Assessments
+  await seedProjBasedTechAssessments();
+
+  // Seed Self Assessments
+  await seedSelfAssessments();
+
+  // Seed Employers, Learners, and Mentors
+  await seedEmployers();
+  await seedLearners();
+  await seedMentors();
+
+  // Seed SA Questions
+  await seedSAQuestions();
+
+  // Seed Learner Project-Based Tech Assessments
+  await seedLearnerProjBasedTechAssessments();
+
+  // Seed Learner Skill Gaps
+  await seedLearnSkillGaps();
+
+  // Seed Learner Private Data
+  await seedLearnerPrivateData();
+
+  // Seed Job Listings and their Skill Categories
+  await seedJobListings();
+
+  await seedJobListingHasSkillCategory();
+
+  await seedMentorSkills();
+
+  console.log('All seeding operations completed.');
 }
 
 main()
