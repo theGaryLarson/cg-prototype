@@ -36,6 +36,7 @@ model Employer {
 model JobListing {
   job_listing_id                 String                    @id @unique(map: "job_listing_id_UNIQUE") @db.Char(36)
   employer_id                    String                    @db.Char(36)
+  job_title                      String                   @db.VarChar(255)
   position_loc                   JobListingPositionLoc
   salary_range                   String                    @db.VarChar(45)
   region                         String                    @db.VarChar(45)
@@ -135,6 +136,7 @@ model mentor_has_skill {
 model proj_based_tech_assessment {
   proj_based_tech_assessment_id      String                           @unique(map: "proj_based_tech_assessment_id_UNIQUE") @db.Char(36)
   skill_category_id                  String                           @db.Char(36)
+  title                              String                           @db.VarChar(255)
   url                                String                           @db.VarChar(255)
   learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
   skill_category                     skill_category                   @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proj_based_tech_assessment_skill_category1")
@@ -147,6 +149,7 @@ model sa_possible_answer {
   sa_possible_answer_id String      @id @unique(map: "sa_possible_answer_id_UNIQUE") @db.Char(36)
   sa_question_id        String      @db.Char(36)
   answer_text           String?     @db.VarChar(255)
+  is_correct            Boolean?    @db.TinyInt() @default(false)
   sa_question           sa_question @relation(fields: [sa_question_id], references: [sa_question_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sa_possilbe_answer_sa_question1")
 
   @@index([sa_question_id], map: "fk_sa_possible_answer_sa_question1_idx")
@@ -157,7 +160,6 @@ model sa_question {
   self_assessment_id String                     @db.Char(36)
   sa_question_text   String                     @db.VarChar(255)
   question_type      SelfAssessmentQuestionType
-  correct_answer_id  String                     @db.Char(36)
   sa_possible_answer sa_possible_answer[]
   self_assessment    self_assessment            @relation(fields: [self_assessment_id], references: [self_assessment_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sa_question_self_assessment")
 
@@ -176,8 +178,8 @@ model self_assessment {
 model Skill {
   skill_id          String         @id @unique(map: "skill_id_UNIQUE") @db.Char(36)
   skill_category_id String         @db.Char(36)
-  skill_name        String         @db.VarChar(45)
-  skill_description String         @db.VarChar(45)
+  skill_name        String         @db.VarChar(255)
+  skill_description String         @db.VarChar(255)
   skill_category    skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_skill_category")
 
   @@index([skill_category_id], map: "fk_skill_skill_category_idx")
