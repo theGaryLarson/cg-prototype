@@ -428,16 +428,21 @@ async function fetchTrainingProgramDependencies(): Promise<{
   return { trainingProviders, skillCategories };
 }
 
-async function seedTrainingPrograms(): Promise<void> {
+async function seedTrainingPrograms(): Promise<TrainingProgramData[]> {
   console.log('Seeding Training Programs...');
   const { trainingProviders, skillCategories } = await fetchTrainingProgramDependencies();
+  const createdTrainingPrograms: TrainingProgramData[] = [];
   for (const trainingProvider of trainingProviders) {
     const skillCategory = skillCategories[Math.floor(Math.random() * skillCategories.length)];
-    await createTrainingProgram(
-      trainingProvider.training_provider_id,
-      skillCategory.skill_category_id,
+    createdTrainingPrograms.push(
+      await createTrainingProgram(
+        trainingProvider.training_provider_id,
+        skillCategory.skill_category_id,
+      ),
     );
   }
+  console.log(`\tSeeded ${createdTrainingPrograms.length} records for Training Programs.`);
+  return createdTrainingPrograms;
 }
 
 /// ///////////////////////////////////////////////////////////
