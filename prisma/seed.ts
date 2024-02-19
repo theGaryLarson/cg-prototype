@@ -943,7 +943,7 @@ function generateEmployerData(userId: string): EmployerData {
 async function createEmployer(userId: string): Promise<EmployerData> {
   const employerData: EmployerData = generateEmployerData(userId);
 
-  const employer = await prisma.employer.create({
+  const employer: EmployerData = await prisma.employer.create({
     data: employerData,
   });
   // console.log(`Employer record created with ID: ${employer.employerId} for User ID: ${userId}`);
