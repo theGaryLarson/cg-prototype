@@ -7,11 +7,11 @@ import {
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
-
-const NUM_USERS = 15;
-const NUM_LEARNERS = NUM_USERS % 3;
-const NUM_EMPLOYERS = NUM_USERS % 3;
-const NUM_MENTORS = NUM_USERS % 3;
+const SEED = 123;
+const NUM_USERS = 30; // for simplicity ensure is divisible by 3.
+const NUM_LEARNERS = Math.floor(NUM_USERS / 3);
+const NUM_EMPLOYERS = Math.floor(NUM_USERS / 3);
+const NUM_MENTORS = Math.floor(NUM_USERS / 3);
 const NUM_SKILL_CATEGORIES = 10;
 const NUM_SKILLS = NUM_SKILL_CATEGORIES * 5; // five skills in each category
 const NUM_JOB_SKILL_RELATIONSHIPS = 50;
