@@ -789,19 +789,23 @@ async function createJobListing(employerId: string): Promise<JobListingData> {
   return jobListingData;
 }
 
-async function seedJobListings() {
+async function seedJobListings(): Promise<JobListingData[]> {
   console.log('Seeding Job Listings...');
   //TODO: seed two unique job listings for each employer
   const employers: EmployerData[] = await fetchJobListingDependencies();
+  const createdJobListings: JobListingData[] = [];
   for (const employer of employers) {
     // Seed the first job listing
-    await createJobListing(employer.employerId);
+    createdJobListings.push(await createJobListing(employer.employerId));
 
     // Seed the second job listing
-    await createJobListing(employer.employerId);
+    createdJobListings.push(await createJobListing(employer.employerId));
   }
 
-  console.log(`Seeded two job listings for each of ${employers.length} employers.`);
+  console.log(
+    `\tSeeded a total ${createdJobListings.length} job listings. Two for each of ${employers.length} employers.`,
+  );
+  return createdJobListings;
 }
 
 /// ///////////////////////////////////////////////////////////
