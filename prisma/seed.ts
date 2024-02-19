@@ -598,17 +598,32 @@ async function createLearner(learnerData: LearnerData): Promise<LearnerData> {
   return learner;
 }
 
-async function seedLearners(): Promise<void> {
+async function seedLearners(): Promise<LearnerData[]> {
   console.log('Seeding Learners...');
   const { users, edInstitutions } = await fetchLearnerDependencies();
-  for (let i = 0; i < NUM_LEARNERS; i++) {
-    // TODO: fix: if NUM_LEARNERS > users.length will create duplicated users as learners.
-    const userId = users[i % users.length].userId; // Cycle through users
-    // TODO: fix logic here
-    const eduInstitutionId =
-      i % 2 === 0 ? edInstitutions[i % edInstitutions.length].edInstitutionId : undefined;
-    await createLearner(userId, eduInstitutionId);
+  const learnerUsers = users.slice(0, NUM_LEARNERS);
+  const learners: LearnerData[] = [];
+
+  for (let i = 0; i < learnerUsers.length; i++) {
+    const userId = learnerUsers[i].userId; // Cycle through users
+    // Generate learner data without edu_institution_id
+    let learnerData = generateLearnerData(userId);
+
+    // If the learner is enrolled in college, randomly assign an educational institution
+    if (learnerData.is_enrolled_college === 1) {
+      const randomEdInstitution = edInstitutions[Math.floor(Math.random() * edInstitutions.length)];
+      learnerData = {
+        ...learnerData,
+        edu_institution_id: randomEdInstitution.edInstitutionId, // Assign a random edu_institution_id
+      };
+    }
+
+    // Now create the learner with the potentially updated edu_institution_id
+    learners.push(await createLearner(learnerData));
   }
+
+  console.log(`\tSeeded ${learners.length} learners.`);
+  return learners;
 }
 
 /// ///////////////////////////////////////////////////////////
