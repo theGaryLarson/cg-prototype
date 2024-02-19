@@ -821,8 +821,14 @@ interface EdInstitutionData {
 function generateEdInstitutionData(): EdInstitutionData {
   return {
     edInstitutionId: faker.string.uuid(),
-    name: faker.company.name(),
-    address: faker.location.streetAddress(true),
+    name:
+      faker.company.name() + ' ' + faker.helpers.arrayElement(['University', 'College', 'Agency']),
+    address:
+      faker.location.streetAddress(true) +
+      ' ' +
+      faker.location.city() +
+      ', WA ' +
+      faker.location.zipCode(),
     contactEmail: faker.internet.email(),
     edUrl: faker.internet.url(),
   };
