@@ -1030,11 +1030,14 @@ async function createUser(): Promise<UserData> {
   return user;
 }
 
-async function seedUser(): Promise<void> {
+async function seedUser(): Promise<UserData[]> {
   console.log('Seeding Users...');
+  const createUsers: UserData[] = [];
   for (let i = 0; i < NUM_USERS; i++) {
-    await createUser();
+    createUsers.push(await createUser());
   }
+  console.log(`\tSeeded ${createUsers.length} records for User table.`);
+  return createUsers;
 }
 
 const waCounties = [
