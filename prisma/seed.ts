@@ -340,6 +340,7 @@ interface TechAssessmentData {
   proj_based_tech_assessment_id: string;
   skill_category_id: string;
   title: string;
+  description: string | null;
   url: string;
 }
 
@@ -348,6 +349,7 @@ function generateTechAssessmentData(skillCategoryId: string, title: string): Tec
     proj_based_tech_assessment_id: faker.string.uuid(),
     skill_category_id: skillCategoryId,
     title: title,
+    description: faker.lorem.sentence(),
     url: faker.internet.url(),
   };
 }
