@@ -536,12 +536,17 @@ async function createSkill(skillCategoryId: string): Promise<SkillData> {
   return skill;
 }
 
-async function seedSkillData(): Promise<void> {
+async function seedSkillData(): Promise<SkillData[]> {
   console.log('Seeding Skills...');
-  const skillCategories = await fetchSkillDataDependencies();
+  const skillCategories: SkillCategoryData[] = await fetchSkillDataDependencies();
+  const createdSkillData: SkillData[] = [];
   for (let i = 0; i < NUM_SKILLS; i++) {
-    await createSkill(skillCategories[i % skillCategories.length].skill_category_id);
+    createdSkillData.push(
+      await createSkill(skillCategories[i % skillCategories.length].skill_category_id),
+    );
   }
+  console.log(`\tSeeded ${createdSkillData.length} records for Skill table.`);
+  return createdSkillData;
 }
 
 /// ///////////////////////////////////////////////////////////
