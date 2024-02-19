@@ -368,9 +368,10 @@ async function createTechAssessment(
   return createdRecord;
 }
 
-async function seedProjBasedTechAssessments(): Promise<void> {
+async function seedProjBasedTechAssessments(): Promise<TechAssessmentData[]> {
   console.log('Seeding Project-Based Tech Assessments...');
-  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  const skillCategories: SkillCategoryData[] = await fetchTechAssessmentDependencies();
+  const createdTechAssessmentData: TechAssessmentData[] = [];
   for (const skillCategory of skillCategories) {
     // Generate a title by appending "Assessment" to the skill category's name
     const title = `${skillCategory.category_name} Assessment`;
@@ -379,10 +380,11 @@ async function seedProjBasedTechAssessments(): Promise<void> {
     const techAssessmentData = generateTechAssessmentData(skillCategory.skill_category_id, title);
 
     // Create the tech assessment record in the database
-    await createTechAssessment(techAssessmentData);
+    createdTechAssessmentData.push(await createTechAssessment(techAssessmentData));
   }
 
-  console.log('Tech assessments seeded for each skill category.');
+  console.log(`\tSeeded ${createdTechAssessmentData.length} records for each skill category.`);
+  return createdTechAssessmentData;
 }
 
 /// ///////////////////////////////////////////////////////////
