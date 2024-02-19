@@ -125,9 +125,10 @@ async function createLearnerPrivateData(
   return createdRecord;
 }
 
-async function seedLearnerPrivateData(): Promise<void> {
+async function seedLearnerPrivateData(): Promise<LearnerPrivateData[]> {
   console.log('Seeding Learner Private Data...');
   const learners = await fetchLearnerPrivateDataDependencies();
+  const createdPrivateData: LearnerPrivateData[] = [];
 
   for (const learner of learners) {
     // Decide whether to include an SSN based on 20% probability
@@ -135,10 +136,12 @@ async function seedLearnerPrivateData(): Promise<void> {
     const ssn = includeSSN ? faker.number.int({ min: 100000000, max: 999999999 }).toString() : null;
 
     const learnerPrivateData = generateLearnerPrivateData(learner.learnerId, ssn);
-    await createLearnerPrivateData(learnerPrivateData);
+    createdPrivateData.push(await createLearnerPrivateData(learnerPrivateData));
   }
-
-  console.log('Seeded learner private data with 20% entries having null SSN.');
+  console.log(
+    `\tSeeded ${createdPrivateData.length} learner private data records with 20% entries having null SSN.`,
+  );
+  return createdPrivateData;
 }
 
 /// ///////////////////////////////////////////////////////////
