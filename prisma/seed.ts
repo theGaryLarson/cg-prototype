@@ -707,16 +707,35 @@ async function createJobListingHasSkillCategory(
   return jobListingSkillCategoryData;
 }
 
-async function seedJobListingHasSkillCategory(): Promise<void> {
+async function seedJobListingHasSkillCategory(): Promise<JobListingHasSkillCategoryData[]> {
   console.log('Seeding Job Listing Skill Categories...');
   const { jobListings, skillCategories } = await fetchJobListingSkillCategoryDependencies();
-  for (let i = 0; i < NUM_JOB_SKILL_RELATIONSHIPS; i++) {
-    await createJobListingHasSkillCategory(
-      // TODO: fine tune mapping of these to be more meaningful
-      jobListings[i % jobListings.length].job_listing_id,
-      skillCategories[i % skillCategories.length].skill_category_id,
-    );
+  const createdJobSkillCategoryRelationships: JobListingHasSkillCategoryData[] = [];
+
+  // Iterate over each job listing
+  for (const jobListing of jobListings) {
+    // Determine a random number of skill categories to assign to this job listing (between 1 and 3)
+    const numSkillCategories = Math.floor(Math.random() * 3) + 2;
+
+    // Shuffle skill categories and select the first 'numSkillCategories' as the categories for this job listing
+    const shuffledSkillCategories = skillCategories.sort(() => 0.5 - Math.random());
+    const selectedSkillCategories = shuffledSkillCategories.slice(0, numSkillCategories);
+
+    // Create JobListingSkillCategory records for the selected skill categories
+    for (const skillCategory of selectedSkillCategories) {
+      createdJobSkillCategoryRelationships.push(
+        await createJobListingHasSkillCategory(
+          jobListing.job_listing_id,
+          skillCategory.skill_category_id,
+        ),
+      );
+    }
   }
+
+  console.log(
+    `\tSeeded ${createdJobSkillCategoryRelationships.length} records for Job Listing Has Skill Category table.`,
+  );
+  return createdJobSkillCategoryRelationships;
 }
 
 /// ///////////////////////////////////////////////////////////
