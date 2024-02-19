@@ -642,8 +642,8 @@ function generateSkillCategoryData(category: string): SkillCategoryData {
   };
 }
 
-async function createSkillCategory(): Promise<SkillCategoryData> {
-  const skillCategoryData: SkillCategoryData = generateSkillCategoryData();
+async function createSkillCategory(category: string): Promise<SkillCategoryData> {
+  const skillCategoryData: SkillCategoryData = generateSkillCategoryData(category);
   const skillCategory: SkillCategoryData = await prisma.skill_category.create({
     data: skillCategoryData,
   });
