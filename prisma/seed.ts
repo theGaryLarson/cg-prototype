@@ -1,9 +1,4 @@
-import {
-  JobListingPositionLoc,
-  PrismaClient,
-  SelfAssessmentQuestionType,
-  User,
-} from '@prisma/client';
+import { JobListingPositionLoc, PrismaClient, SelfAssessmentQuestionType } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -14,7 +9,6 @@ const NUM_EMPLOYERS = Math.floor(NUM_USERS / 3);
 const NUM_MENTORS = Math.floor(NUM_USERS / 3);
 const NUM_SKILL_CATEGORIES = 10;
 const NUM_SKILLS = NUM_SKILL_CATEGORIES * 5; // five skills in each category
-const NUM_JOB_SKILL_RELATIONSHIPS = 50;
 const NUM_ED_INSTITUTIONS = 10;
 
 // to continually populate the database by running npx prisma db seed. You will need to remove
