@@ -634,10 +634,10 @@ interface SkillCategoryData {
   category_description: string;
 }
 
-function generateSkillCategoryData(): SkillCategoryData {
+function generateSkillCategoryData(category: string): SkillCategoryData {
   return {
     skill_category_id: faker.string.uuid(),
-    category_name: faker.commerce.department(), // Generates a department name as a category name
+    category_name: category, // Generates a department name as a category name
     category_description: faker.lorem.sentence(), // Generates a simple description
   };
 }
