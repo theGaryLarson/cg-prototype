@@ -47,7 +47,7 @@ async function fetchSAQuestionDependencies(): Promise<SelfAssessmentData[]> {
 }
 
 async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<SAQuestionData> {
-  return prisma.sa_question.create({
+  const createdRecord = await prisma.sa_question.create({
     data: {
       sa_question_id: SAQuestionDataObject.sa_question_id,
       self_assessment_id: SAQuestionDataObject.self_assessment_id,
@@ -73,6 +73,8 @@ async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<S
       },
     },
   });
+  // console.log(`SAQuestion created with ID: ${createdRecord.sa_question_id}`);
+  return createdRecord;
 }
 async function seedSAQuestions(): Promise<void> {
   console.log('Seeding Self Assessment Questions...');
