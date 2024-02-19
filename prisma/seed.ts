@@ -901,15 +901,18 @@ async function fetchMentorSkillDependencies() {
 
 async function seedMentorSkills(): Promise<MentorHasSkillData[]> {
   console.log('Seeding Mentor Skills...');
-  const mentors = await prisma.mentor.findMany();
-  const skillCategories = await prisma.skill_category.findMany();
-
+  const { mentors, skillCategories } = await fetchMentorSkillDependencies();
+  const createdMentorSkills: MentorHasSkillData[] = [];
   for (const mentor of mentors) {
     // assign random category as mentor expertise
     const randomSkillCategory =
       skillCategories[Math.floor(Math.random() * skillCategories.length)].skill_category_id;
-    await createMentorSkillRelation(mentor.mentor_id, randomSkillCategory);
+    createdMentorSkills.push(
+      await createMentorSkillRelation(mentor.mentor_id, randomSkillCategory),
+    );
   }
+  console.log(`\t Seeded ${createdMentorSkills.length} record for MentorSkills table.`);
+  return createdMentorSkills;
 }
 
 /// ///////////////////////////////////////////////////////////
