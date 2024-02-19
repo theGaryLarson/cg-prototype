@@ -590,16 +590,11 @@ function generateLearnerData(userId: string, eduInstitutionId?: string | null): 
   };
 }
 
-async function createLearner(
-  userId: string,
-  eduInstitutionId?: string | null,
-): Promise<LearnerData> {
-  const learnerData = generateLearnerData(userId, eduInstitutionId);
-
-  const learner = await prisma.learner.create({
+async function createLearner(learnerData: LearnerData): Promise<LearnerData> {
+  const learner: LearnerData = await prisma.learner.create({
     data: learnerData,
   });
-  console.log(`Created Learner with ID: ${learner.learnerId}`);
+  // console.log(`Learner record created with ID: ${learner.learnerId}`);
   return learner;
 }
 
