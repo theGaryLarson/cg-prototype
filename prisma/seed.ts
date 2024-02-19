@@ -1180,9 +1180,12 @@ async function main(): Promise<void> {
   await seedUser();
 
   // Seed Skill Categories and Skills
-  const skillCategories = await seedSkillCategories();
+  await seedSkillCategories();
 
   await seedSkillData();
+
+  // Seed Ed Institutions
+  await seedEdInstitutions();
 
   // Seed Training Providers
   await seedTrainingProviders();
