@@ -118,9 +118,10 @@ async function createLearnerPrivateData(
   const createdRecord: LearnerPrivateData = await prisma.learner_private_data.create({
     data: learnerPrivateDataObject,
   });
-  console.log(
-    `Created LearnerPrivateData Record with ID: ${createdRecord.learner_private_data_id}`,
-  );
+  console
+    .log
+    // `Created LearnerPrivateData Record with ID: ${createdRecord.learner_private_data_id}`,
+    ();
   return createdRecord;
 }
 
