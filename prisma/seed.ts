@@ -311,11 +311,14 @@ async function fetchLearnerProjBasedTechAssessmentDependencies() {
 
   return { learners, projBasedTechAssessments };
 }
-async function seedLearnerProjBasedTechAssessments(): Promise<void> {
+async function seedLearnerProjBasedTechAssessments(): Promise<
+  LearnerProjBasedTechAssessmentData[]
+> {
   console.log('Seeding Learner Project-Based Tech Assessments...');
   // Fetch logic is needed to get learners and projBasedTechAssessments
   const { learners, projBasedTechAssessments } =
     await fetchLearnerProjBasedTechAssessmentDependencies();
+  const projBasedAssessments: LearnerProjBasedTechAssessmentData[] = [];
 
   for (const learner of learners) {
     const projBasedTechAssessment =
@@ -325,8 +328,10 @@ async function seedLearnerProjBasedTechAssessments(): Promise<void> {
       learner.learnerId,
       projBasedTechAssessment.proj_based_tech_assessment_id,
     );
-    await createLearnerProjBasedTechAssessment(createdRecord);
+    projBasedAssessments.push(await createLearnerProjBasedTechAssessment(createdRecord));
   }
+  console.log(`\tSeeded ${projBasedAssessments.length} Learner project-based assessment records.`);
+  return projBasedAssessments;
 }
 
 /// ///////////////////////////////////////////////////////////
