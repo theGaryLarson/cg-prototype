@@ -836,10 +836,10 @@ function generateEdInstitutionData(): EdInstitutionData {
 
 async function createEdInstitution(): Promise<EdInstitutionData> {
   // Generate a single EdInstitution entry
-  const edInstitutionData = generateEdInstitutionData();
+  const edInstitutionData: EdInstitutionData = generateEdInstitutionData();
 
   // Create EdInstitution entry in the database
-  const edInstitution = await prisma.edInstitution.create({
+  const edInstitution: EdInstitutionData = await prisma.edInstitution.create({
     data: edInstitutionData,
   });
   // console.log(`EdInstitution record created with ID: ${edInstitution.edInstitutionId}`);
