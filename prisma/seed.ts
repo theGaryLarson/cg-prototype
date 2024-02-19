@@ -232,13 +232,12 @@ async function fetchLearnSkillGapDependencies(): Promise<{
   return { learners, skillCategories };
 }
 
-async function seedLearnSkillGaps(): Promise<void> {
+async function seedLearnSkillGaps(): Promise<LearnerSkillGapData[]> {
   console.log('Seeding Learner Skill Gaps...');
   const { learners, skillCategories } = await fetchLearnSkillGapDependencies();
+  const createdSkillGapData: LearnerSkillGapData[] = [];
   // Iterate over learners
   for (const learner of learners) {
-    // Assuming we want to associate each learner with a subset of all skill categories
-    // For simplicity, let's select a random skill category for each learner
     const selectedSkillCategory =
       skillCategories[Math.floor(Math.random() * skillCategories.length)];
 
@@ -249,10 +248,11 @@ async function seedLearnSkillGaps(): Promise<void> {
     );
 
     // Create learner skill gap data record
-    await createLearnerSkillGapData(learnerSkillGapData);
+    createdSkillGapData.push(await createLearnerSkillGapData(learnerSkillGapData));
   }
 
-  console.log('Learner skill gap data seeding completed.');
+  console.log(`\tSeeded ${createdSkillGapData.length} Skill Gap Data records.`);
+  return createdSkillGapData;
 }
 
 /// ///////////////////////////////////////////////////////////
