@@ -489,9 +489,10 @@ async function fetchTrainingProviderDependencies(): Promise<{
   return { users, eduInstitutions };
 }
 
-async function seedTrainingProviders(): Promise<void> {
+async function seedTrainingProviders(): Promise<TrainingProviderData[]> {
   console.log('Seeding Training Providers...');
   const { users, eduInstitutions } = await fetchTrainingProviderDependencies();
+  const createdTrainingProviders: TrainingProviderData[] = [];
 
   // TODO: make meaningful. Assuming you want to create a training provider for each user
   for (const user of users) {
@@ -499,8 +500,10 @@ async function seedTrainingProviders(): Promise<void> {
     const eduInstitutionId: string =
       eduInstitutions[Math.floor(Math.random() * eduInstitutions.length)].edInstitutionId;
 
-    await createTrainingProvider(user.userId, eduInstitutionId);
+    createdTrainingProviders.push(await createTrainingProvider(user.userId, eduInstitutionId));
   }
+  console.log(`\tSeeded ${createdTrainingProviders.length} records for Training Providers.`);
+  return createdTrainingProviders;
 }
 
 /// ///////////////////////////////////////////////////////////
