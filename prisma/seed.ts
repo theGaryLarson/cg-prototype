@@ -847,11 +847,13 @@ async function createEdInstitution(): Promise<EdInstitutionData> {
 }
 
 async function seedEdInstitutions(): Promise<EdInstitutionData[]> {
-  const edInstitutions: EdInstitutionData[] = [];
+  console.log('Seeding Edu Institutions...');
+  const createdEdInstitutions: EdInstitutionData[] = [];
   for (let i = 0; i < NUM_ED_INSTITUTIONS; i++) {
-    edInstitutions.push(await createEdInstitution());
+    createdEdInstitutions.push(await createEdInstitution());
   }
-  return edInstitutions;
+  console.log(`\t Seeded ${createdEdInstitutions.length} records for Ed Institutions table.`);
+  return createdEdInstitutions;
 }
 
 /// ///////////////////////////////////////////////////////////
