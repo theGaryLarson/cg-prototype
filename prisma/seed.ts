@@ -211,7 +211,7 @@ function generateLearnerSkillGapData(
 async function createLearnerSkillGapData(
   learnerSkillGapDataObject: LearnerSkillGapData,
 ): Promise<LearnerSkillGapData> {
-  return prisma.learner_skill_gap_data.create({
+  const createdRecord = await prisma.learner_skill_gap_data.create({
     data: {
       learner_skill_gap_data_id: learnerSkillGapDataObject.learner_skill_gap_data_id,
       learner_id: learnerSkillGapDataObject.learner_id,
