@@ -977,7 +977,7 @@ function generateMentorData(userId: string): MentorData {
 }
 
 async function createMentor(userId: string): Promise<MentorData> {
-  const mentorData = generateMentorData(userId);
+  const mentorData: MentorData = generateMentorData(userId);
   await prisma.mentor.create({
     data: mentorData,
   });
