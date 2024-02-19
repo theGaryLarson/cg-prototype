@@ -1023,11 +1023,11 @@ function generateUserData(): UserData {
 async function createUser(): Promise<UserData> {
   const userData = generateUserData();
 
-  const user = await prisma.user.create({
+  const user: UserData = await prisma.user.create({
     data: userData,
   });
-  console.log(`Created User with ID: ${user.userId} with mock hashed password`);
-  return user; // Return the created user for possible relational data seeding
+  // console.log(`Created User with ID: ${user.userId} with mock hashed password`);
+  return user;
 }
 
 async function seedUser(): Promise<void> {
