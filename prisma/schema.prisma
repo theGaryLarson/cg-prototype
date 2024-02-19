@@ -138,6 +138,7 @@ model proj_based_tech_assessment {
   skill_category_id                  String                           @db.Char(36)
   title                              String                           @db.VarChar(255)
   url                                String                           @db.VarChar(255)
+  description                        String?                          @db.VarChar(255)
   learner_proj_based_tech_assessment LearnerProjBasedTechAssessment[]
   skill_category                     skill_category                   @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proj_based_tech_assessment_skill_category1")
 
