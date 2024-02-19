@@ -577,14 +577,14 @@ function generateLearnerData(userId: string, eduInstitutionId?: string | null): 
     learnerId: faker.string.uuid(),
     user_id: userId,
     is_enrolled_college: isEnrolledInCollege,
-    edu_institution_id: isEnrolledInCollege === 0 ? null : eduInstitutionId,
+    edu_institution_id: isEnrolledInCollege ? null : eduInstitutionId,
     degree_type: faker.helpers.arrayElement([
       'Associate',
       'Bachelors',
       'Certification',
       'Online-Course',
     ]),
-    intern_hours_required: faker.number.int({ min: 0, max: 1 }),
+    intern_hours_required: isEnrolledInCollege ? faker.number.int({ min: 0, max: 1 }) : 0,
     major: faker.person.jobArea(),
     minor: faker.datatype.boolean() ? faker.person.jobArea() : 'none',
   };
