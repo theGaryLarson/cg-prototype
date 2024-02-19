@@ -950,12 +950,16 @@ async function createEmployer(userId: string): Promise<EmployerData> {
   return employer;
 }
 
-async function seedEmployers(): Promise<void> {
+async function seedEmployers(): Promise<EmployerData[]> {
   console.log('Seeding Employers...');
-  const users = await fetchEmployerDependencies();
-  for (let i = 0; i < NUM_EMPLOYERS; i++) {
-    await createEmployer(users[i % users.length].userId);
+  const users: UserData[] = await fetchEmployerDependencies();
+  const employerUsers: UserData[] = users.slice(NUM_LEARNERS, NUM_LEARNERS + NUM_EMPLOYERS);
+  const createdEmployers: EmployerData[] = [];
+  for (let i = 0; i < employerUsers.length; i++) {
+    createdEmployers.push(await createEmployer(employerUsers[i].userId));
   }
+  console.log(`\tSeeded ${createdEmployers.length} records for Employers table.`);
+  return createdEmployers;
 }
 
 /// ///////////////////////////////////////////////////////////
