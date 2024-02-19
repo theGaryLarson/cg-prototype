@@ -893,7 +893,13 @@ async function createMentorSkillRelation(
   return mentorSkillData;
 }
 
-async function seedMentorSkills() {
+async function fetchMentorSkillDependencies() {
+  const mentors: MentorData[] = await prisma.mentor.findMany();
+  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  return { mentors, skillCategories };
+}
+
+async function seedMentorSkills(): Promise<MentorHasSkillData[]> {
   console.log('Seeding Mentor Skills...');
   const mentors = await prisma.mentor.findMany();
   const skillCategories = await prisma.skill_category.findMany();
