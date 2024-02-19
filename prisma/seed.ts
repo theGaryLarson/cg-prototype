@@ -17,6 +17,10 @@ const NUM_SKILLS = NUM_SKILL_CATEGORIES * 5; // five skills in each category
 const NUM_JOB_SKILL_RELATIONSHIPS = 50;
 const NUM_ED_INSTITUTIONS = 10;
 
+// to continually populate the database by running npx prisma db seed. You will need to remove
+// the SEED argument. If not unique constraints will be violated for PKs uuid.
+// recommended to leave it and use <npx prisma migrate reset> to drop data, apply migrations, and reseed the db.
+faker.seed(SEED);
 /// ///////////////////////////////////////////////////////////
 
 interface SAQuestionData {
