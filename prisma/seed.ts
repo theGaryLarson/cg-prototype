@@ -693,12 +693,11 @@ function generateJobListingSkillCategoryData(
 async function createJobListingHasSkillCategory(
   jobListingId: string,
   skillCategoryId: string,
-): Promise<void> {
+): Promise<JobListingHasSkillCategoryData> {
   const jobListingSkillCategoryData = generateJobListingSkillCategoryData(
     jobListingId,
     skillCategoryId,
   );
-
   const jobListingSkillCategory = await prisma.jobListingSkillCategory.create({
     data: jobListingSkillCategoryData,
   });
