@@ -167,7 +167,7 @@ async function createSelfAssessment(
   const createdRecord: SelfAssessmentData = await prisma.self_assessment.create({
     data: selfAssessmentDataObject,
   });
-  console.log(`created self assessment record with id: ${createdRecord.self_assessment_id}`);
+  // console.log(`created self assessment record with id: ${createdRecord.self_assessment_id}`);
   return createdRecord;
 }
 
@@ -214,6 +214,8 @@ async function createLearnerSkillGapData(
       skill_category_id: learnerSkillGapDataObject.skill_category_id,
     },
   });
+  // console.log(`LearnerSkillGap record created with ID: ${createdRecord.learner_skill_gap_data_id}`);
+  return createdRecord;
 }
 
 async function fetchLearnSkillGapDependencies(): Promise<{
@@ -292,9 +294,9 @@ async function createLearnerProjBasedTechAssessment(
     },
   });
 
-  console.log(
-    `LearnerProjBasedTechAssessment created with ID: ${createdRecord.learner_proj_based_tech_assessment_id}`,
-  ); // Assuming 'id' is the automatically generated ID by Prisma/DB
+  // console.log(
+  //   `LearnerProjBasedTechAssessment record created with ID: ${createdRecord.learner_proj_based_tech_assessment_id}`,
+  // );
   return createdRecord;
 }
 
@@ -351,9 +353,9 @@ async function createTechAssessment(
   const createdRecord = await prisma.proj_based_tech_assessment.create({
     data: techAssessmentDataObject,
   });
-  console.log(
-    `Create Tech Assessment record with ID: ${techAssessmentDataObject.proj_based_tech_assessment_id}`,
-  );
+  // console.log(
+  //   `Create Tech Assessment record with ID: ${techAssessmentDataObject.proj_based_tech_assessment_id}`,
+  // );
   return createdRecord;
 }
 
@@ -402,7 +404,7 @@ async function createTrainingProgram(
   await prisma.training_program.create({
     data: trainingProgramData,
   });
-  console.log(`TrainingProgram created with ID: ${trainingProgramData.training_program_id}`);
+  // console.log(`TrainingProgram record created with ID: ${trainingProgramData.training_program_id}`);
   return trainingProgramData;
 }
 
@@ -454,7 +456,7 @@ async function createTrainingProvider(
   const trainingProvider = await prisma.trainingProvider.create({
     data: trainingProviderData,
   });
-  console.log(`Created TrainingProvider with ID: ${trainingProvider.training_provider_id}`);
+  // console.log(`Created TrainingProvider with ID: ${trainingProvider.training_provider_id}`);
   return trainingProvider;
 }
 
@@ -511,7 +513,7 @@ async function createSkill(skillCategoryId: string): Promise<SkillData> {
   await prisma.skill.create({
     data: skill,
   });
-  console.log(`Created skill with ID: ${skill.skill_id}`);
+  // console.log(`Skill record created with ID: ${skill.skill_id}`);
   return skill;
 }
 
@@ -611,7 +613,7 @@ async function createSkillCategory(): Promise<SkillCategoryData> {
   const skillCategory: SkillCategoryData = await prisma.skill_category.create({
     data: skillCategoryData,
   });
-  console.log(`Created skill_category with ID: ${skillCategory.skill_category_id}`);
+  // console.log(`Skill Category record created with ID: ${skillCategory.skill_category_id}`);
   return skillCategory;
 }
 
@@ -665,9 +667,10 @@ async function createJobListingHasSkillCategory(
   const jobListingSkillCategory = await prisma.jobListingSkillCategory.create({
     data: jobListingSkillCategoryData,
   });
-  console.log(
-    `Created JobListingSkillCategory with ID: ${jobListingSkillCategory.job_listing_has_skill_category_id}`,
-  );
+  // console.log(
+  //   `JobListingSkillCategory record created with ID: ${jobListingSkillCategory.job_listing_has_skill_category_id}`,
+  // );
+  return jobListingSkillCategoryData;
 }
 
 async function seedJobListingHasSkillCategory(): Promise<void> {
@@ -729,7 +732,7 @@ async function createJobListing(employerId: string): Promise<JobListingData> {
   const jobListing: JobListingData = await prisma.jobListing.create({
     data: jobListingData,
   });
-  console.log(`Created JobListing with ID: ${jobListing.job_listing_id}`);
+  // console.log(`JobListing record created with ID: ${jobListing.job_listing_id}`);
   return jobListingData;
 }
 
@@ -776,7 +779,7 @@ async function createEdInstitution(): Promise<EdInstitutionData> {
   const edInstitution = await prisma.edInstitution.create({
     data: edInstitutionData,
   });
-  console.log(`Created EdInstitution with ID: ${edInstitution.edInstitutionId}`);
+  // console.log(`EdInstitution record created with ID: ${edInstitution.edInstitutionId}`);
   return edInstitution;
 }
 
@@ -821,7 +824,7 @@ async function createMentorSkillRelation(
       },
     },
   });
-  console.log(`MentorHasSkill created with ID: ${mentorSkillData.mentor_has_skill_id}`);
+  // console.log(`MentorHasSkill record created with ID: ${mentorSkillData.mentor_has_skill_id}`);
   return mentorSkillData;
 }
 
@@ -869,7 +872,7 @@ async function createEmployer(userId: string): Promise<EmployerData> {
   const employer = await prisma.employer.create({
     data: employerData,
   });
-  console.log(`Created Employer with ID: ${employer.employerId} for User ID: ${userId}`);
+  // console.log(`Employer record created with ID: ${employer.employerId} for User ID: ${userId}`);
   return employer;
 }
 
@@ -900,7 +903,7 @@ async function createMentor(userId: string): Promise<MentorData> {
   await prisma.mentor.create({
     data: mentorData,
   });
-  console.log(`Mentor created for User ID: ${userId}`);
+  // console.log(`Mentor record created for User ID: ${userId}`);
   return mentorData;
 }
 
