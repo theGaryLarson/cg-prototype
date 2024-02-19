@@ -653,11 +653,12 @@ async function createSkillCategory(category: string): Promise<SkillCategoryData>
 
 async function seedSkillCategories(): Promise<SkillCategoryData[]> {
   console.log('Seeding Skill Categories...');
-  const skillCategories: SkillCategoryData[] = [];
-  for (let i = 0; i < NUM_SKILL_CATEGORIES; i++) {
-    skillCategories.push(await createSkillCategory());
+  const createSkillCategories: SkillCategoryData[] = [];
+  for (const category of staticSkillCategoriesList) {
+    createSkillCategories.push(await createSkillCategory(category));
   }
-  return skillCategories;
+  console.log(`\tSeeded ${createSkillCategories.length} skill categories.`);
+  return createSkillCategories;
 }
 
 /// ///////////////////////////////////////////////////////////
