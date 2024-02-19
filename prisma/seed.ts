@@ -171,19 +171,23 @@ async function createSelfAssessment(
   return createdRecord;
 }
 
-async function seedSelfAssessments(): Promise<void> {
+async function seedSelfAssessments(): Promise<SelfAssessmentData[]> {
   console.log('Seeding Self Assessments...');
   const skillCategories: SkillCategoryData[] = await fetchSelfAssessmentDependencies();
+  const createdSelfAssessmentData: SelfAssessmentData[] = [];
 
   // Iterate through each skill category to create a self-assessment
   for (const skillCategory of skillCategories) {
     const selfAssessmentDataObject: SelfAssessmentData = generateSelfAssessmentData(
       skillCategory.skill_category_id,
     );
-    await createSelfAssessment(selfAssessmentDataObject);
+    createdSelfAssessmentData.push(await createSelfAssessment(selfAssessmentDataObject));
   }
 
-  console.log(`Created self-assessment records for each skill category.`);
+  console.log(
+    `\tSeeded ${createdSelfAssessmentData.length} self-assessment records. One for each skill category.`,
+  );
+  return createdSelfAssessmentData;
 }
 
 /// ///////////////////////////////////////////////////////////
