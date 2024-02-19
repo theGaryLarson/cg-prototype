@@ -70,23 +70,27 @@ async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<S
   // console.log(`SAQuestion created with ID: ${createdRecord.sa_question_id}`);
   return createdRecord;
 }
-async function seedSAQuestions(): Promise<void> {
+async function seedSAQuestions(): Promise<SAQuestionData[]> {
   console.log('Seeding Self Assessment Questions...');
   const selfAssessments = await fetchSAQuestionDependencies();
   const questionTypes = [
     SelfAssessmentQuestionType.interest,
     SelfAssessmentQuestionType.competency,
   ];
+  const createdQuestions: SAQuestionData[] = [];
 
   for (const assessment of selfAssessments) {
     // creates an interest and competency question for each self-assessment
     for (const type of questionTypes) {
       const saQuestionData = generateSAQuestionData(assessment.self_assessment_id, type);
-      await createSAQuestion(saQuestionData);
+      createdQuestions.push(await createSAQuestion(saQuestionData));
     }
   }
 
-  console.log('Seeded SA_Questions.');
+  console.log(
+    `\tSeeded ${createdQuestions.length} SA_Questions with interest and competency question for each of the ${selfAssessments.length} self-assessments.`,
+  );
+  return createdQuestions;
 }
 /// ///////////////////////////////////////////////////////////
 
