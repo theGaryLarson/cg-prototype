@@ -985,7 +985,12 @@ async function createMentor(userId: string): Promise<MentorData> {
   return mentorData;
 }
 
-async function seedMentors(): Promise<void> {
+async function fetchMentorDependencies() {
+  const users: UserData[] = await prisma.user.findMany();
+  return users;
+}
+
+async function seedMentors(): Promise<MentorData[]> {
   console.log('Seeding Mentors...');
   const users = await prisma.user.findMany({ take: NUM_MENTORS }); // Adjust 'take' as needed
   for (const user of users) {
