@@ -933,8 +933,8 @@ function generateEmployerData(userId: string): EmployerData {
   return {
     employerId: faker.string.uuid(),
     user_id: userId,
-    title: faker.person.jobTitle(),
-    home_office_location: faker.location.city(),
+    title: faker.company.name(),
+    home_office_location: faker.location.city() + ', WA',
     employer_url: faker.internet.url(),
     logo_url: faker.image.urlPicsumPhotos({ width: 480, height: 480 }),
   };
