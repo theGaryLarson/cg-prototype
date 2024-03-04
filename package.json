@@ -8,7 +8,8 @@
     "test": "jest"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm prisma/seed.ts"
+    "seed": "node --loader ts-node/esm lib/prisma/seed.ts",
+    "schema": "lib/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",
@@ -21,7 +22,7 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.0",
     "@testing-library/jest-dom": "^6.2.0",
-    "@testing-library/react": "^14.1.2",
+    "@testing-library/react": "^14.2.1",
     "@types/node": "20.3.1",
     "@types/react": "18.2.8",
     "@types/react-dom": "18.2.5",
