@@ -41,7 +41,7 @@ model JobListing {
   salary_range                   String                    @db.VarChar(45)
   region                         String                    @db.VarChar(45)
   employer                       Employer                  @relation(fields: [employer_id], references: [employerId], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_listing_employer1")
-  job_listing_has_skill_category JobListingSkillCategory[]
+  jobListingSkillCategories      JobListingSkillCategory[]
 
   @@index([employer_id], map: "fk_job_listing_employer1_idx")
   @@map("job_listing")
@@ -181,6 +181,7 @@ model Skill {
   skill_category_id String         @db.Char(36)
   skill_name        String         @db.VarChar(255)
   skill_description String         @db.VarChar(255)
+  skill_class       SkillClassification @default(none)
   skill_category    skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_skill_category")
 
   @@index([skill_category_id], map: "fk_skill_skill_category_idx")
@@ -250,4 +251,11 @@ enum SelfAssessmentQuestionType {
   competency @map("competency")
 
   @@map("sa_question_question_type")
+}
+
+enum SkillClassification {
+  none @map("none")
+  common @map("common")
+  specialized @map("specialized")
+  software @map("software")
 }
