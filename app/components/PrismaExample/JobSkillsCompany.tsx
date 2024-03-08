@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-export default function JobSkillListing({
+export default function JobSkillsCompany({
   listing,
 }: {
   listing: JobListingWithSkillsAndCompany;
@@ -9,10 +9,10 @@ export default function JobSkillListing({
   const jobTitle = listing.job_title !== '' ? listing.job_title : 'unknown username';
   return (
     <div>
-      <h1>{jobTitle}</h1>
-      <h3>{listing.employer.title}</h3>
       <hr />
-      <p>Company: {listing.employer.title}</p>
+      <h1>{jobTitle}</h1>
+      <hr />
+      <h3>Company: {listing.employer.title}</h3>
       <p>Salary: {listing.salary_range}</p>
       <p>Region: {listing.region}</p>
       <ul>
