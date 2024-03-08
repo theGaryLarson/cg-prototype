@@ -6,7 +6,7 @@ export default function User({ user }: { user: UserType }): React.ReactElement {
   const userName = user.userName !== '' ? user.userName : 'unknown username';
   return (
     <div>
-      <h1>{userName}</h1>
+      <h3>{userName}</h3>
       <p>{user.email}</p>
     </div>
   );
