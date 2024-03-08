@@ -1,4 +1,26 @@
-import { JobListingPositionLoc, PrismaClient, SelfAssessmentQuestionType } from '@prisma/client';
+import {
+  EdInstitution,
+  Employer,
+  JobListing,
+  JobListingPositionLoc,
+  JobListingSkillCategory,
+  Learner,
+  learner_private_data,
+  learner_skill_gap_data,
+  LearnerProjBasedTechAssessment,
+  mentor,
+  mentor_has_skill,
+  PrismaClient,
+  proj_based_tech_assessment,
+  sa_question,
+  self_assessment,
+  SelfAssessmentQuestionType,
+  Skill,
+  skill_category,
+  training_program,
+  trainingProvider,
+  User,
+} from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -17,17 +39,10 @@ const NUM_ED_INSTITUTIONS = 10;
 faker.seed(SEED);
 /// ///////////////////////////////////////////////////////////
 
-interface SAQuestionData {
-  sa_question_id: string;
-  self_assessment_id: string;
-  sa_question_text: string;
-  question_type: SelfAssessmentQuestionType;
-}
-
 function generateSAQuestionData(
   selfAssessmentId: string,
   questionType: SelfAssessmentQuestionType,
-): SAQuestionData {
+): sa_question {
   return {
     sa_question_id: faker.string.uuid(),
     self_assessment_id: selfAssessmentId,
@@ -36,12 +51,12 @@ function generateSAQuestionData(
   };
 }
 
-async function fetchSAQuestionDependencies(): Promise<SelfAssessmentData[]> {
+async function fetchSAQuestionDependencies(): Promise<self_assessment[]> {
   return prisma.self_assessment.findMany();
 }
 
-async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<SAQuestionData> {
-  const createdRecord = await prisma.sa_question.create({
+async function createSAQuestion(SAQuestionDataObject: sa_question): Promise<sa_question> {
+  const createdRecord: sa_question = await prisma.sa_question.create({
     data: {
       sa_question_id: SAQuestionDataObject.sa_question_id,
       self_assessment_id: SAQuestionDataObject.self_assessment_id,
@@ -70,14 +85,14 @@ async function createSAQuestion(SAQuestionDataObject: SAQuestionData): Promise<S
   // console.log(`SAQuestion created with ID: ${createdRecord.sa_question_id}`);
   return createdRecord;
 }
-async function seedSAQuestions(): Promise<SAQuestionData[]> {
+async function seedSAQuestions(): Promise<sa_question[]> {
   console.log('Seeding Self Assessment Questions...');
   const selfAssessments = await fetchSAQuestionDependencies();
   const questionTypes = [
     SelfAssessmentQuestionType.interest,
     SelfAssessmentQuestionType.competency,
   ];
-  const createdQuestions: SAQuestionData[] = [];
+  const createdQuestions: sa_question[] = [];
 
   for (const assessment of selfAssessments) {
     // creates an interest and competency question for each self-assessment
@@ -94,13 +109,7 @@ async function seedSAQuestions(): Promise<SAQuestionData[]> {
 }
 /// ///////////////////////////////////////////////////////////
 
-interface LearnerPrivateData {
-  learner_private_data_id: string;
-  learner_id: string;
-  ssn: string | null;
-}
-
-function generateLearnerPrivateData(learnerId: string, ssn: string | null): LearnerPrivateData {
+function generateLearnerPrivateData(learnerId: string, ssn: string | null): learner_private_data {
   return {
     learner_private_data_id: faker.string.uuid(),
     learner_id: learnerId,
@@ -108,27 +117,27 @@ function generateLearnerPrivateData(learnerId: string, ssn: string | null): Lear
   };
 }
 
-async function fetchLearnerPrivateDataDependencies(): Promise<LearnerData[]> {
+async function fetchLearnerPrivateDataDependencies(): Promise<Learner[]> {
   return prisma.learner.findMany();
 }
 
 async function createLearnerPrivateData(
-  learnerPrivateDataObject: LearnerPrivateData,
-): Promise<LearnerPrivateData> {
-  const createdRecord: LearnerPrivateData = await prisma.learner_private_data.create({
+  learnerPrivateDataObject: learner_private_data,
+): Promise<learner_private_data> {
+  const createdRecord: learner_private_data = await prisma.learner_private_data.create({
     data: learnerPrivateDataObject,
   });
   console
     .log
-    // `Created LearnerPrivateData Record with ID: ${createdRecord.learner_private_data_id}`,
+    // `Created learner_private_data Record with ID: ${createdRecord.learner_private_data_id}`,
     ();
   return createdRecord;
 }
 
-async function seedLearnerPrivateData(): Promise<LearnerPrivateData[]> {
+async function seedLearnerPrivateData(): Promise<learner_private_data[]> {
   console.log('Seeding Learner Private Data...');
   const learners = await fetchLearnerPrivateDataDependencies();
-  const createdPrivateData: LearnerPrivateData[] = [];
+  const createdPrivateData: learner_private_data[] = [];
 
   for (const learner of learners) {
     // Decide whether to include an SSN based on 20% probability
@@ -145,40 +154,36 @@ async function seedLearnerPrivateData(): Promise<LearnerPrivateData[]> {
 }
 
 /// ///////////////////////////////////////////////////////////
-interface SelfAssessmentData {
-  self_assessment_id: string;
-  skill_category_id: string;
-}
 
-function generateSelfAssessmentData(skillCategoryId: string): SelfAssessmentData {
+function generateSelfAssessmentData(skillCategoryId: string): self_assessment {
   return {
     self_assessment_id: faker.string.uuid(),
     skill_category_id: skillCategoryId,
   };
 }
 
-async function fetchSelfAssessmentDependencies(): Promise<SkillCategoryData[]> {
+async function fetchSelfAssessmentDependencies(): Promise<skill_category[]> {
   return prisma.skill_category.findMany();
 }
 
 async function createSelfAssessment(
-  selfAssessmentDataObject: SelfAssessmentData,
-): Promise<SelfAssessmentData> {
-  const createdRecord: SelfAssessmentData = await prisma.self_assessment.create({
+  selfAssessmentDataObject: self_assessment,
+): Promise<self_assessment> {
+  const createdRecord: self_assessment = await prisma.self_assessment.create({
     data: selfAssessmentDataObject,
   });
   // console.log(`created self assessment record with id: ${createdRecord.self_assessment_id}`);
   return createdRecord;
 }
 
-async function seedSelfAssessments(): Promise<SelfAssessmentData[]> {
+async function seedSelfAssessments(): Promise<self_assessment[]> {
   console.log('Seeding Self Assessments...');
-  const skillCategories: SkillCategoryData[] = await fetchSelfAssessmentDependencies();
-  const createdSelfAssessmentData: SelfAssessmentData[] = [];
+  const skillCategories: skill_category[] = await fetchSelfAssessmentDependencies();
+  const createdSelfAssessmentData: self_assessment[] = [];
 
   // Iterate through each skill category to create a self-assessment
   for (const skillCategory of skillCategories) {
-    const selfAssessmentDataObject: SelfAssessmentData = generateSelfAssessmentData(
+    const selfAssessmentDataObject: self_assessment = generateSelfAssessmentData(
       skillCategory.skill_category_id,
     );
     createdSelfAssessmentData.push(await createSelfAssessment(selfAssessmentDataObject));
@@ -191,16 +196,11 @@ async function seedSelfAssessments(): Promise<SelfAssessmentData[]> {
 }
 
 /// ///////////////////////////////////////////////////////////
-interface LearnerSkillGapData {
-  learner_skill_gap_data_id: string;
-  learner_id: string;
-  skill_category_id: string;
-}
 
 function generateLearnerSkillGapData(
   learnerId: string,
   skillCategoryId: string,
-): LearnerSkillGapData {
+): learner_skill_gap_data {
   return {
     learner_skill_gap_data_id: faker.string.uuid(),
     learner_id: learnerId,
@@ -209,8 +209,8 @@ function generateLearnerSkillGapData(
 }
 
 async function createLearnerSkillGapData(
-  learnerSkillGapDataObject: LearnerSkillGapData,
-): Promise<LearnerSkillGapData> {
+  learnerSkillGapDataObject: learner_skill_gap_data,
+): Promise<learner_skill_gap_data> {
   const createdRecord = await prisma.learner_skill_gap_data.create({
     data: {
       learner_skill_gap_data_id: learnerSkillGapDataObject.learner_skill_gap_data_id,
@@ -223,19 +223,19 @@ async function createLearnerSkillGapData(
 }
 
 async function fetchLearnSkillGapDependencies(): Promise<{
-  learners: LearnerData[];
-  skillCategories: SkillCategoryData[];
+  learners: Learner[];
+  skillCategories: skill_category[];
 }> {
-  const learners: LearnerData[] = await prisma.learner.findMany();
-  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  const learners: Learner[] = await prisma.learner.findMany();
+  const skillCategories: skill_category[] = await prisma.skill_category.findMany();
 
   return { learners, skillCategories };
 }
 
-async function seedLearnSkillGaps(): Promise<LearnerSkillGapData[]> {
+async function seedLearnSkillGaps(): Promise<learner_skill_gap_data[]> {
   console.log('Seeding Learner Skill Gaps...');
   const { learners, skillCategories } = await fetchLearnSkillGapDependencies();
-  const createdSkillGapData: LearnerSkillGapData[] = [];
+  const createdSkillGapData: learner_skill_gap_data[] = [];
   // Iterate over learners
   for (const learner of learners) {
     const selectedSkillCategory =
@@ -257,18 +257,10 @@ async function seedLearnSkillGaps(): Promise<LearnerSkillGapData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface LearnerProjBasedTechAssessmentData {
-  learner_proj_based_tech_assessment_id: string;
-  learner_id: string;
-  proj_based_tech_assessment_id: string;
-  attempt_date: Date;
-  has_passed: number;
-}
-
 function generateLearnerProjBasedTechAssessmentData(
   learnerId: string,
   projBasedTechAssessmentId: string,
-): LearnerProjBasedTechAssessmentData {
+): LearnerProjBasedTechAssessment {
   return {
     learner_proj_based_tech_assessment_id: faker.string.uuid(), // generate manually as prisma does NOT handle autogenerate of uuid
     learner_id: learnerId,
@@ -279,8 +271,8 @@ function generateLearnerProjBasedTechAssessmentData(
 }
 
 async function createLearnerProjBasedTechAssessment(
-  techAssessmentDataObject: LearnerProjBasedTechAssessmentData,
-): Promise<LearnerProjBasedTechAssessmentData> {
+  techAssessmentDataObject: LearnerProjBasedTechAssessment,
+): Promise<LearnerProjBasedTechAssessment> {
   const createdRecord = await prisma.learnerProjBasedTechAssessment.create({
     data: {
       learner_proj_based_tech_assessment_id:
@@ -305,20 +297,18 @@ async function createLearnerProjBasedTechAssessment(
 }
 
 async function fetchLearnerProjBasedTechAssessmentDependencies() {
-  const learners: LearnerData[] = await prisma.learner.findMany();
-  const projBasedTechAssessments: TechAssessmentData[] =
+  const learners: Learner[] = await prisma.learner.findMany();
+  const projBasedTechAssessments: proj_based_tech_assessment[] =
     await prisma.proj_based_tech_assessment.findMany();
 
   return { learners, projBasedTechAssessments };
 }
-async function seedLearnerProjBasedTechAssessments(): Promise<
-  LearnerProjBasedTechAssessmentData[]
-> {
+async function seedLearnerProjBasedTechAssessments(): Promise<LearnerProjBasedTechAssessment[]> {
   console.log('Seeding Learner Project-Based Tech Assessments...');
   // Fetch logic is needed to get learners and projBasedTechAssessments
   const { learners, projBasedTechAssessments } =
     await fetchLearnerProjBasedTechAssessmentDependencies();
-  const projBasedAssessments: LearnerProjBasedTechAssessmentData[] = [];
+  const projBasedAssessments: LearnerProjBasedTechAssessment[] = [];
 
   for (const learner of learners) {
     const projBasedTechAssessment =
@@ -336,15 +326,10 @@ async function seedLearnerProjBasedTechAssessments(): Promise<
 
 /// ///////////////////////////////////////////////////////////
 
-interface TechAssessmentData {
-  proj_based_tech_assessment_id: string;
-  skill_category_id: string;
-  title: string;
-  description: string | null;
-  url: string;
-}
-
-function generateTechAssessmentData(skillCategoryId: string, title: string): TechAssessmentData {
+function generateTechAssessmentData(
+  skillCategoryId: string,
+  title: string,
+): proj_based_tech_assessment {
   return {
     proj_based_tech_assessment_id: faker.string.uuid(),
     skill_category_id: skillCategoryId,
@@ -354,13 +339,13 @@ function generateTechAssessmentData(skillCategoryId: string, title: string): Tec
   };
 }
 
-async function fetchTechAssessmentDependencies(): Promise<SkillCategoryData[]> {
+async function fetchTechAssessmentDependencies(): Promise<skill_category[]> {
   return prisma.skill_category.findMany();
 }
 
 async function createTechAssessment(
-  techAssessmentDataObject: TechAssessmentData,
-): Promise<TechAssessmentData> {
+  techAssessmentDataObject: proj_based_tech_assessment,
+): Promise<proj_based_tech_assessment> {
   const createdRecord = await prisma.proj_based_tech_assessment.create({
     data: techAssessmentDataObject,
   });
@@ -370,10 +355,10 @@ async function createTechAssessment(
   return createdRecord;
 }
 
-async function seedProjBasedTechAssessments(): Promise<TechAssessmentData[]> {
+async function seedProjBasedTechAssessments(): Promise<proj_based_tech_assessment[]> {
   console.log('Seeding Project-Based Tech Assessments...');
-  const skillCategories: SkillCategoryData[] = await fetchTechAssessmentDependencies();
-  const createdTechAssessmentData: TechAssessmentData[] = [];
+  const skillCategories: skill_category[] = await fetchTechAssessmentDependencies();
+  const createdTechAssessmentData: proj_based_tech_assessment[] = [];
   for (const skillCategory of skillCategories) {
     // Generate a title by appending "Assessment" to the skill category's name
     const title = `${skillCategory.category_name} Assessment`;
@@ -391,17 +376,11 @@ async function seedProjBasedTechAssessments(): Promise<TechAssessmentData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface TrainingProgramData {
-  training_program_id: string;
-  training_provider_id: string;
-  skill_category_id: string;
-}
-
 // Function to generate training program data
 function generateTrainingProgramData(
   trainingProviderId: string,
   skillCategoryId: string,
-): TrainingProgramData {
+): training_program {
   return {
     training_program_id: faker.string.uuid(),
     training_provider_id: trainingProviderId,
@@ -412,7 +391,7 @@ function generateTrainingProgramData(
 async function createTrainingProgram(
   trainingProviderId: string,
   skillCategoryId: string,
-): Promise<TrainingProgramData> {
+): Promise<training_program> {
   const trainingProgramData = generateTrainingProgramData(trainingProviderId, skillCategoryId);
   await prisma.training_program.create({
     data: trainingProgramData,
@@ -422,18 +401,18 @@ async function createTrainingProgram(
 }
 
 async function fetchTrainingProgramDependencies(): Promise<{
-  trainingProviders: TrainingProviderData[];
-  skillCategories: SkillCategoryData[];
+  trainingProviders: trainingProvider[];
+  skillCategories: skill_category[];
 }> {
   const trainingProviders = await prisma.trainingProvider.findMany();
   const skillCategories = await prisma.skill_category.findMany();
   return { trainingProviders, skillCategories };
 }
 
-async function seedTrainingPrograms(): Promise<TrainingProgramData[]> {
+async function seedTrainingPrograms(): Promise<training_program[]> {
   console.log('Seeding Training Programs...');
   const { trainingProviders, skillCategories } = await fetchTrainingProgramDependencies();
-  const createdTrainingPrograms: TrainingProgramData[] = [];
+  const createdTrainingPrograms: training_program[] = [];
   for (const trainingProvider of trainingProviders) {
     const skillCategory = skillCategories[Math.floor(Math.random() * skillCategories.length)];
     createdTrainingPrograms.push(
@@ -449,16 +428,7 @@ async function seedTrainingPrograms(): Promise<TrainingProgramData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface TrainingProviderData {
-  training_provider_id: string;
-  user_id: string;
-  edu_institution_id: string;
-}
-
-function generateTrainingProviderData(
-  userId: string,
-  edInstitutionId: string,
-): TrainingProviderData {
+function generateTrainingProviderData(userId: string, edInstitutionId: string): trainingProvider {
   return {
     training_provider_id: faker.string.uuid(),
     user_id: userId,
@@ -469,7 +439,7 @@ function generateTrainingProviderData(
 async function createTrainingProvider(
   userId: string,
   edInstitutionId: string,
-): Promise<TrainingProviderData> {
+): Promise<trainingProvider> {
   const trainingProviderData = generateTrainingProviderData(userId, edInstitutionId);
   const trainingProvider = await prisma.trainingProvider.create({
     data: trainingProviderData,
@@ -479,22 +449,22 @@ async function createTrainingProvider(
 }
 
 async function fetchTrainingProviderDependencies(): Promise<{
-  users: UserData[];
-  eduInstitutions: EdInstitutionData[];
+  users: User[];
+  eduInstitutions: EdInstitution[];
 }> {
-  const users: UserData[] = await prisma.user.findMany({
+  const users: User[] = await prisma.user.findMany({
     take: 10,
   });
-  const eduInstitutions: EdInstitutionData[] = await prisma.edInstitution.findMany({
+  const eduInstitutions: EdInstitution[] = await prisma.edInstitution.findMany({
     take: 10,
   });
   return { users, eduInstitutions };
 }
 
-async function seedTrainingProviders(): Promise<TrainingProviderData[]> {
+async function seedTrainingProviders(): Promise<trainingProvider[]> {
   console.log('Seeding Training Providers...');
   const { users, eduInstitutions } = await fetchTrainingProviderDependencies();
-  const createdTrainingProviders: TrainingProviderData[] = [];
+  const createdTrainingProviders: trainingProvider[] = [];
 
   // TODO: make meaningful. Assuming you want to create a training provider for each user
   for (const user of users) {
@@ -510,27 +480,21 @@ async function seedTrainingProviders(): Promise<TrainingProviderData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface SkillData {
-  skill_id: string;
-  skill_category_id: string;
-  skill_name: string;
-  skill_description: string;
-}
-
-async function fetchSkillDataDependencies(): Promise<SkillCategoryData[]> {
+async function fetchSkillDataDependencies(): Promise<skill_category[]> {
   return prisma.skill_category.findMany();
 }
-function generateSkillData(skillCategoryId: string): SkillData {
+function generateSkillData(skillCategoryId: string): Skill {
   return {
     skill_id: faker.string.uuid(),
     skill_category_id: skillCategoryId,
     skill_name: faker.commerce.productName(),
     skill_description: faker.lorem.sentence(),
+    skill_class: 'none',
   };
 }
 
-async function createSkill(skillCategoryId: string): Promise<SkillData> {
-  const skill: SkillData = generateSkillData(skillCategoryId);
+async function createSkill(skillCategoryId: string): Promise<Skill> {
+  const skill: Skill = generateSkillData(skillCategoryId);
   await prisma.skill.create({
     data: skill,
   });
@@ -538,10 +502,10 @@ async function createSkill(skillCategoryId: string): Promise<SkillData> {
   return skill;
 }
 
-async function seedSkillData(): Promise<SkillData[]> {
+async function seedSkillData(): Promise<Skill[]> {
   console.log('Seeding Skills...');
-  const skillCategories: SkillCategoryData[] = await fetchSkillDataDependencies();
-  const createdSkillData: SkillData[] = [];
+  const skillCategories: skill_category[] = await fetchSkillDataDependencies();
+  const createdSkillData: Skill[] = [];
   for (let i = 0; i < NUM_SKILLS; i++) {
     createdSkillData.push(
       await createSkill(skillCategories[i % skillCategories.length].skill_category_id),
@@ -553,27 +517,16 @@ async function seedSkillData(): Promise<SkillData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface LearnerData {
-  learnerId: string;
-  user_id: string;
-  is_enrolled_college: number;
-  edu_institution_id?: string | null; // Optional
-  degree_type: string;
-  intern_hours_required: number;
-  major: string | null;
-  minor: string | null;
-}
-
 async function fetchLearnerDependencies(): Promise<{
-  users: UserData[];
-  edInstitutions: EdInstitutionData[];
+  users: User[];
+  edInstitutions: EdInstitution[];
 }> {
-  const users: UserData[] = await prisma.user.findMany();
-  const edInstitutions: EdInstitutionData[] = await prisma.edInstitution.findMany();
+  const users: User[] = await prisma.user.findMany();
+  const edInstitutions: EdInstitution[] = await prisma.edInstitution.findMany();
   return { users, edInstitutions };
 }
 
-function generateLearnerData(userId: string, eduInstitutionId?: string | null): LearnerData {
+function generateLearnerData(userId: string, eduInstitutionId: string | null): Learner {
   const isEnrolledInCollege = faker.number.int({ min: 0, max: 1 });
   return {
     learnerId: faker.string.uuid(),
@@ -592,24 +545,23 @@ function generateLearnerData(userId: string, eduInstitutionId?: string | null): 
   };
 }
 
-async function createLearner(learnerData: LearnerData): Promise<LearnerData> {
-  const learner: LearnerData = await prisma.learner.create({
+async function createLearner(learnerData: Learner): Promise<Learner> {
+  const learner: Learner = await prisma.learner.create({
     data: learnerData,
   });
   // console.log(`Learner record created with ID: ${learner.learnerId}`);
   return learner;
 }
 
-async function seedLearners(): Promise<LearnerData[]> {
+async function seedLearners(): Promise<Learner[]> {
   console.log('Seeding Learners...');
   const { users, edInstitutions } = await fetchLearnerDependencies();
   const learnerUsers = users.slice(0, NUM_LEARNERS);
-  const learners: LearnerData[] = [];
+  const learners: Learner[] = [];
 
   for (let i = 0; i < learnerUsers.length; i++) {
     const userId = learnerUsers[i].userId; // Cycle through users
-    // Generate learner data without edu_institution_id
-    let learnerData = generateLearnerData(userId);
+    let learnerData = generateLearnerData(userId, null);
 
     // If the learner is enrolled in college, randomly assign an educational institution
     if (learnerData.is_enrolled_college === 1) {
@@ -630,13 +582,7 @@ async function seedLearners(): Promise<LearnerData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface SkillCategoryData {
-  skill_category_id: string;
-  category_name: string;
-  category_description: string;
-}
-
-function generateSkillCategoryData(category: string): SkillCategoryData {
+function generateSkillCategoryData(category: string): skill_category {
   return {
     skill_category_id: faker.string.uuid(),
     category_name: category, // Generates a department name as a category name
@@ -644,18 +590,18 @@ function generateSkillCategoryData(category: string): SkillCategoryData {
   };
 }
 
-async function createSkillCategory(category: string): Promise<SkillCategoryData> {
-  const skillCategoryData: SkillCategoryData = generateSkillCategoryData(category);
-  const skillCategory: SkillCategoryData = await prisma.skill_category.create({
+async function createSkillCategory(category: string): Promise<skill_category> {
+  const skillCategoryData: skill_category = generateSkillCategoryData(category);
+  const skillCategory: skill_category = await prisma.skill_category.create({
     data: skillCategoryData,
   });
   // console.log(`Skill Category record created with ID: ${skillCategory.skill_category_id}`);
   return skillCategory;
 }
 
-async function seedSkillCategories(): Promise<SkillCategoryData[]> {
+async function seedSkillCategories(): Promise<skill_category[]> {
   console.log('Seeding Skill Categories...');
-  const createSkillCategories: SkillCategoryData[] = [];
+  const createSkillCategories: skill_category[] = [];
   for (const category of staticSkillCategoriesList) {
     createSkillCategories.push(await createSkillCategory(category));
   }
@@ -665,18 +611,12 @@ async function seedSkillCategories(): Promise<SkillCategoryData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface JobListingHasSkillCategoryData {
-  job_listing_has_skill_category_id: string;
-  job_listing_id: string;
-  skill_category_id: string;
-}
-
 async function fetchJobListingSkillCategoryDependencies(): Promise<{
-  jobListings: JobListingData[];
-  skillCategories: SkillCategoryData[];
+  jobListings: JobListing[];
+  skillCategories: skill_category[];
 }> {
-  const jobListings: JobListingData[] = await prisma.jobListing.findMany();
-  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  const jobListings: JobListing[] = await prisma.jobListing.findMany();
+  const skillCategories: skill_category[] = await prisma.skill_category.findMany();
 
   return { jobListings, skillCategories };
 }
@@ -684,7 +624,7 @@ async function fetchJobListingSkillCategoryDependencies(): Promise<{
 function generateJobListingSkillCategoryData(
   jobListingId: string,
   skillCategoryId: string,
-): JobListingHasSkillCategoryData {
+): JobListingSkillCategory {
   return {
     job_listing_has_skill_category_id: faker.string.uuid(),
     job_listing_id: jobListingId,
@@ -695,7 +635,7 @@ function generateJobListingSkillCategoryData(
 async function createJobListingHasSkillCategory(
   jobListingId: string,
   skillCategoryId: string,
-): Promise<JobListingHasSkillCategoryData> {
+): Promise<JobListingSkillCategory> {
   const jobListingSkillCategoryData = generateJobListingSkillCategoryData(
     jobListingId,
     skillCategoryId,
@@ -709,10 +649,10 @@ async function createJobListingHasSkillCategory(
   return jobListingSkillCategoryData;
 }
 
-async function seedJobListingHasSkillCategory(): Promise<JobListingHasSkillCategoryData[]> {
+async function seedJobListingHasSkillCategory(): Promise<JobListingSkillCategory[]> {
   console.log('Seeding Job Listing Skill Categories...');
   const { jobListings, skillCategories } = await fetchJobListingSkillCategoryDependencies();
-  const createdJobSkillCategoryRelationships: JobListingHasSkillCategoryData[] = [];
+  const createdJobSkillCategoryRelationships: JobListingSkillCategory[] = [];
 
   // Iterate over each job listing
   for (const jobListing of jobListings) {
@@ -742,18 +682,10 @@ async function seedJobListingHasSkillCategory(): Promise<JobListingHasSkillCateg
 
 /// ///////////////////////////////////////////////////////////
 
-interface JobListingData {
-  job_listing_id: string;
-  employer_id: string;
-  job_title: string;
-  position_loc: JobListingPositionLoc;
-  salary_range: string;
-  region: string;
-}
-async function fetchJobListingDependencies(): Promise<EmployerData[]> {
+async function fetchJobListingDependencies(): Promise<Employer[]> {
   return prisma.employer.findMany();
 }
-function generateJobListingData(employerId: string): JobListingData {
+function generateJobListingData(employerId: string): JobListing {
   return {
     job_listing_id: faker.string.uuid(),
     employer_id: employerId,
@@ -782,20 +714,20 @@ function getRandomItJobTitle() {
   return itJobTitles[index];
 }
 
-async function createJobListing(employerId: string): Promise<JobListingData> {
-  const jobListingData: JobListingData = generateJobListingData(employerId);
-  const jobListing: JobListingData = await prisma.jobListing.create({
+async function createJobListing(employerId: string): Promise<JobListing> {
+  const jobListingData: JobListing = generateJobListingData(employerId);
+  const jobListing: JobListing = await prisma.jobListing.create({
     data: jobListingData,
   });
   // console.log(`JobListing record created with ID: ${jobListing.job_listing_id}`);
   return jobListingData;
 }
 
-async function seedJobListings(): Promise<JobListingData[]> {
+async function seedJobListings(): Promise<JobListing[]> {
   console.log('Seeding Job Listings...');
   //TODO: seed two unique job listings for each employer
-  const employers: EmployerData[] = await fetchJobListingDependencies();
-  const createdJobListings: JobListingData[] = [];
+  const employers: Employer[] = await fetchJobListingDependencies();
+  const createdJobListings: JobListing[] = [];
   for (const employer of employers) {
     // Seed the first job listing
     createdJobListings.push(await createJobListing(employer.employerId));
@@ -812,15 +744,7 @@ async function seedJobListings(): Promise<JobListingData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface EdInstitutionData {
-  edInstitutionId: string;
-  name: string | null;
-  address: string;
-  contactEmail: string;
-  edUrl: string;
-}
-
-function generateEdInstitutionData(): EdInstitutionData {
+function generateEdInstitutionData(): EdInstitution {
   return {
     edInstitutionId: faker.string.uuid(),
     name:
@@ -836,21 +760,21 @@ function generateEdInstitutionData(): EdInstitutionData {
   };
 }
 
-async function createEdInstitution(): Promise<EdInstitutionData> {
+async function createEdInstitution(): Promise<EdInstitution> {
   // Generate a single EdInstitution entry
-  const edInstitutionData: EdInstitutionData = generateEdInstitutionData();
+  const edInstitutionData: EdInstitution = generateEdInstitutionData();
 
   // Create EdInstitution entry in the database
-  const edInstitution: EdInstitutionData = await prisma.edInstitution.create({
+  const edInstitution: EdInstitution = await prisma.edInstitution.create({
     data: edInstitutionData,
   });
   // console.log(`EdInstitution record created with ID: ${edInstitution.edInstitutionId}`);
   return edInstitution;
 }
 
-async function seedEdInstitutions(): Promise<EdInstitutionData[]> {
+async function seedEdInstitutions(): Promise<EdInstitution[]> {
   console.log('Seeding Edu Institutions...');
-  const createdEdInstitutions: EdInstitutionData[] = [];
+  const createdEdInstitutions: EdInstitution[] = [];
   for (let i = 0; i < NUM_ED_INSTITUTIONS; i++) {
     createdEdInstitutions.push(await createEdInstitution());
   }
@@ -860,13 +784,7 @@ async function seedEdInstitutions(): Promise<EdInstitutionData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface MentorHasSkillData {
-  mentor_has_skill_id: string;
-  skill_category_id: string;
-  mentor_id: string;
-}
-
-function generateMentorHasSkillData(mentorId: string, skillCategoryId: string): MentorHasSkillData {
+function generateMentorHasSkillData(mentorId: string, skillCategoryId: string): mentor_has_skill {
   return {
     mentor_has_skill_id: faker.string.uuid(),
     skill_category_id: skillCategoryId,
@@ -877,8 +795,8 @@ function generateMentorHasSkillData(mentorId: string, skillCategoryId: string): 
 async function createMentorSkillRelation(
   mentorId: string,
   skillCategoryId: string,
-): Promise<MentorHasSkillData> {
-  const mentorSkillData: MentorHasSkillData = generateMentorHasSkillData(mentorId, skillCategoryId);
+): Promise<mentor_has_skill> {
+  const mentorSkillData: mentor_has_skill = generateMentorHasSkillData(mentorId, skillCategoryId);
   // Note the change here from mentor_has_skill to mentorHasSkill
   await prisma.mentor_has_skill.create({
     data: {
@@ -896,15 +814,15 @@ async function createMentorSkillRelation(
 }
 
 async function fetchMentorSkillDependencies() {
-  const mentors: MentorData[] = await prisma.mentor.findMany();
-  const skillCategories: SkillCategoryData[] = await prisma.skill_category.findMany();
+  const mentors: mentor[] = await prisma.mentor.findMany();
+  const skillCategories: skill_category[] = await prisma.skill_category.findMany();
   return { mentors, skillCategories };
 }
 
-async function seedMentorSkills(): Promise<MentorHasSkillData[]> {
+async function seedMentorSkills(): Promise<mentor_has_skill[]> {
   console.log('Seeding Mentor Skills...');
   const { mentors, skillCategories } = await fetchMentorSkillDependencies();
-  const createdMentorSkills: MentorHasSkillData[] = [];
+  const createdMentorSkills: mentor_has_skill[] = [];
   for (const mentor of mentors) {
     // assign random category as mentor expertise
     const randomSkillCategory =
@@ -919,19 +837,10 @@ async function seedMentorSkills(): Promise<MentorHasSkillData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface EmployerData {
-  employerId: string;
-  user_id: string;
-  title: string;
-  home_office_location: string | null;
-  employer_url: string | null;
-  logo_url: string | null;
-}
-
-async function fetchEmployerDependencies(): Promise<UserData[]> {
+async function fetchEmployerDependencies(): Promise<User[]> {
   return prisma.user.findMany();
 }
-function generateEmployerData(userId: string): EmployerData {
+function generateEmployerData(userId: string): Employer {
   return {
     employerId: faker.string.uuid(),
     user_id: userId,
@@ -942,21 +851,21 @@ function generateEmployerData(userId: string): EmployerData {
   };
 }
 
-async function createEmployer(userId: string): Promise<EmployerData> {
-  const employerData: EmployerData = generateEmployerData(userId);
+async function createEmployer(userId: string): Promise<Employer> {
+  const employerData: Employer = generateEmployerData(userId);
 
-  const employer: EmployerData = await prisma.employer.create({
+  const employer: Employer = await prisma.employer.create({
     data: employerData,
   });
   // console.log(`Employer record created with ID: ${employer.employerId} for User ID: ${userId}`);
   return employer;
 }
 
-async function seedEmployers(): Promise<EmployerData[]> {
+async function seedEmployers(): Promise<Employer[]> {
   console.log('Seeding Employers...');
-  const users: UserData[] = await fetchEmployerDependencies();
-  const employerUsers: UserData[] = users.slice(NUM_LEARNERS, NUM_LEARNERS + NUM_EMPLOYERS);
-  const createdEmployers: EmployerData[] = [];
+  const users: User[] = await fetchEmployerDependencies();
+  const employerUsers: User[] = users.slice(NUM_LEARNERS, NUM_LEARNERS + NUM_EMPLOYERS);
+  const createdEmployers: Employer[] = [];
   for (let i = 0; i < employerUsers.length; i++) {
     createdEmployers.push(await createEmployer(employerUsers[i].userId));
   }
@@ -966,20 +875,15 @@ async function seedEmployers(): Promise<EmployerData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface MentorData {
-  mentor_id: string;
-  user_id: string;
-}
-
-function generateMentorData(userId: string): MentorData {
+function generateMentorData(userId: string): mentor {
   return {
     mentor_id: faker.string.uuid(),
     user_id: userId,
   };
 }
 
-async function createMentor(userId: string): Promise<MentorData> {
-  const mentorData: MentorData = generateMentorData(userId);
+async function createMentor(userId: string): Promise<mentor> {
+  const mentorData: mentor = generateMentorData(userId);
   await prisma.mentor.create({
     data: mentorData,
   });
@@ -988,15 +892,15 @@ async function createMentor(userId: string): Promise<MentorData> {
 }
 
 async function fetchMentorDependencies() {
-  const users: UserData[] = await prisma.user.findMany();
+  const users: User[] = await prisma.user.findMany();
   return users;
 }
 
-async function seedMentors(): Promise<MentorData[]> {
+async function seedMentors(): Promise<mentor[]> {
   console.log('Seeding Mentors...');
   const users = await fetchMentorDependencies();
-  const mentorUsers: UserData[] = users.slice(NUM_LEARNERS + NUM_EMPLOYERS);
-  const createMentors: MentorData[] = [];
+  const mentorUsers: User[] = users.slice(NUM_LEARNERS + NUM_EMPLOYERS);
+  const createMentors: mentor[] = [];
   for (const mentor of mentorUsers) {
     createMentors.push(await createMentor(mentor.userId));
   }
@@ -1006,14 +910,7 @@ async function seedMentors(): Promise<MentorData[]> {
 
 /// ///////////////////////////////////////////////////////////
 
-interface UserData {
-  userId: string;
-  userName: string;
-  password: string;
-  email: string;
-}
-
-function generateUserData(): UserData {
+function generateUserData(): User {
   return {
     userId: faker.string.uuid(),
     userName: faker.internet.userName(),
@@ -1022,19 +919,19 @@ function generateUserData(): UserData {
   };
 }
 
-async function createUser(): Promise<UserData> {
+async function createUser(): Promise<User> {
   const userData = generateUserData();
 
-  const user: UserData = await prisma.user.create({
+  const user: User = await prisma.user.create({
     data: userData,
   });
   // console.log(`Created User with ID: ${user.userId} with mock hashed password`);
   return user;
 }
 
-async function seedUser(): Promise<UserData[]> {
+async function seedUser(): Promise<User[]> {
   console.log('Seeding Users...');
-  const createUsers: UserData[] = [];
+  const createUsers: User[] = [];
   for (let i = 0; i < NUM_USERS; i++) {
     createUsers.push(await createUser());
   }
