@@ -28,7 +28,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
 }
 
 .footer {
@@ -51,7 +51,7 @@
 }
 
 .link {
-  color: #704cb6;
+  color: #6a4cb6;
 }
 
 .link.active {
