@@ -4,7 +4,6 @@ import JobSkillsCompany from './components/PrismaExample/JobSkillsCompany';
 import prisma from '../lib/prisma';
 import { User as UserData } from '@prisma/client';
 import User from './components/PrismaExample/User';
-import ModalTrigger from '@/app/components/ModalTrigger';
 
 export default async function IndexPage(): Promise<React.ReactElement<any, string>> {
   const feed: UserData[] = await prisma.user.findMany();
