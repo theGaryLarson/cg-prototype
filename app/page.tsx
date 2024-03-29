@@ -8,7 +8,6 @@ import ModalTrigger from '@/app/components/ModalTrigger';
 import getJobListingsWithSkills from '@/app/api-functions/jobListing/jobListing';
 import React from 'react';
 
-
 export default async function IndexPage(): Promise<React.ReactElement<any, string>> {
   const feed: UserData[] = await prisma.user.findMany();
 
