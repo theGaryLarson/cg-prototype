@@ -5,33 +5,14 @@ import prisma from '../lib/prisma';
 import { User as UserData } from '@prisma/client';
 import User from './components/PrismaExample/User';
 import ModalTrigger from '@/app/components/ModalTrigger';
+import getJobListingsWithSkills from '@/app/api-functions/jobListing/jobListing';
+import React from 'react';
+
 
 export default async function IndexPage(): Promise<React.ReactElement<any, string>> {
   const feed: UserData[] = await prisma.user.findMany();
 
-  const jobListingsWithSkills = await prisma.jobListing.findMany({
-    select: {
-      job_listing_id: true,
-      job_title: true,
-      position_loc: true,
-      salary_range: true,
-      region: true,
-      employer: {
-        select: {
-          title: true,
-        },
-      },
-      jobListingSkillCategories: {
-        select: {
-          skill_category: {
-            select: {
-              category_name: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const jobListingsWithSkills = await getJobListingsWithSkills();
 
   return (
     <>
@@ -68,5 +49,5 @@ export default async function IndexPage(): Promise<React.ReactElement<any, strin
 }
 
 export const metadata = {
-  title: 'Redux Toolkit',
+  title: 'Career Gate',
 };
