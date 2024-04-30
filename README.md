@@ -102,8 +102,6 @@ npx prisma migrate reset
    ```bash
    npm test
    ```
-10. **Seeding the database**:
-
 ## License
 
 This project is licensed under the terms of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
