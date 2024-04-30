@@ -37,6 +37,7 @@ The main technologies and frameworks used in this project include:
 - [Next.js](https://nextjs.org/): A robust framework for building React apps, with features like server-side rendering
   and static site generation.
 - [React](https://reactjs.org/): A leading JavaScript library for creating interactive user interfaces.
+- [Prisma](https://www.prisma.io/docs): An ORM framework to handle mapping from frontend to data layer.
 - [Redux](https://redux.js.org/): A predictable state container for JavaScript apps.
 - [Jest](https://jestjs.io/): A JavaScript testing framework that works with Babel, TypeScript, Node, React,
   Redux and more!
@@ -63,8 +64,16 @@ Follow these steps to set up and start the project:
    ```bash
    npm install
    ```
+4. **Setting up Environment variables**: Copy the `.env.sample` file and rename to `.env`. Then, assign your MySQL
+   database connection string to the `DATABASE_URL` environment variable
+5. **Seeding the database**: Building and seeding the MySQL database requires one command. Run the following in the
+   terminal
 
-4. **Start the Development Server**: You can start the development server by running:
+```bash
+npx prisma migrate reset
+```
+
+6. **Start the Development Server**: You can start the development server by running:
 
    ```bash
    npm run dev
@@ -73,14 +82,14 @@ Follow these steps to set up and start the project:
    This starts the development server on `localhost:3000` (or a different port if specified). Navigate
    to `http://localhost:3000` (or whichever port you specified) in your browser to see your application running.
 
-5. **Build the Application**: If you want to create an optimized version of the app for deployment, you can create a
+7. **Build the Application**: If you want to create an optimized version of the app for deployment, you can create a
    production build by running:
 
    ```bash
    npm run build
    ```
 
-6. **Start the Production Server**: After creating a build, you can start the production server by running:
+8. **Start the Production Server**: After creating a build, you can start the production server by running:
 
    ```bash
    npm run start
@@ -88,11 +97,12 @@ Follow these steps to set up and start the project:
 
    If you want to run the production server on a specific port, you can use `npm run start -- -p YourPortNumber`. </br>
 
-7. **Running Tests**: If your application has an associated Jest test suite, you can run the tests by executing:
+9. **Running Tests**: If your application has an associated Jest test suite, you can run the tests by executing:
 
    ```bash
    npm test
    ```
+10. **Seeding the database**:
 
 ## License
 
