@@ -34,6 +34,8 @@ Our users include:
 
 The main technologies and frameworks used in this project include:
 
+- [TypeScript](https://www.typescriptlang.org/docs/): A strongly typed programming language that builds on JavaScript,
+  giving you better tooling at any scale.
 - [Next.js](https://nextjs.org/): A robust framework for building React apps, with features like server-side rendering
   and static site generation.
 - [React](https://reactjs.org/): A leading JavaScript library for creating interactive user interfaces.
@@ -102,6 +104,7 @@ npx prisma migrate reset
    ```bash
    npm test
    ```
+
 ## License
 
 This project is licensed under the terms of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
