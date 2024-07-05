@@ -36,7 +36,7 @@ model Employer {
 model JobListing {
   job_listing_id                 String                    @id @unique(map: "job_listing_id_UNIQUE") @db.Char(36)
   employer_id                    String                    @db.Char(36)
-  job_title                      String                   @db.VarChar(255)
+  job_title                      String                    @db.VarChar(255)
   position_loc                   JobListingPositionLoc
   salary_range                   String                    @db.VarChar(45)
   region                         String                    @db.VarChar(45)
@@ -123,11 +123,11 @@ model mentor {
 }
 
 model mentor_has_skill {
-  mentor_has_skill_id              String         @id @unique(map: "mentor_has_skill_id_UNIQUE") @db.Char(36)
-  skill_category_id                String         @db.Char(36)
-  mentor_id                        String         @db.Char(36)
-  mentor                           mentor         @relation(fields: [mentor_id], references: [mentor_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_mentor1")
-  skill_category                   skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_skill_category1")
+  mentor_has_skill_id String         @id @unique(map: "mentor_has_skill_id_UNIQUE") @db.Char(36)
+  skill_category_id   String         @db.Char(36)
+  mentor_id           String         @db.Char(36)
+  mentor              mentor         @relation(fields: [mentor_id], references: [mentor_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_mentor1")
+  skill_category      skill_category @relation(fields: [skill_category_id], references: [skill_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_skill_category_has_mentor_skill_category1")
 
   @@index([mentor_id], map: "fk_skill_category_has_mentor_mentor1_idx")
   @@index([skill_category_id], map: "fk_skill_category_has_mentor_skill_category1_idx")
@@ -149,7 +149,7 @@ model sa_possible_answer {
   sa_possible_answer_id String      @id @unique(map: "sa_possible_answer_id_UNIQUE") @db.Char(36)
   sa_question_id        String      @db.Char(36)
   answer_text           String?     @db.VarChar(255)
-  is_correct            Boolean?    @db.TinyInt() @default(false)
+  is_correct            Boolean?    @default(false) @db.TinyInt()
   sa_question           sa_question @relation(fields: [sa_question_id], references: [sa_question_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sa_possilbe_answer_sa_question1")
 
   @@index([sa_question_id], map: "fk_sa_possible_answer_sa_question1_idx")
@@ -200,7 +200,7 @@ model skill_category {
 }
 
 model training_program {
-  training_program_id String           @id @unique(map: "training_program_id_UNIQUE") @db.Char(36)
+  training_program_id  String           @id @unique(map: "training_program_id_UNIQUE") @db.Char(36)
   training_provider_id String           @db.Char(36)
   skill_category_id    String           @db.Char(36)
   training_provider    trainingProvider @relation(fields: [training_provider_id], references: [training_provider_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_training_program_training_provider1")
